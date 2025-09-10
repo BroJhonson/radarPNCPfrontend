@@ -1,0 +1,14 @@
+# Ambiente Virtual do Python
+venv/
+__pycache__/
+
+
+# Dependências do Node.js
+# A pasta node_modules pode ter milhares de arquivos.
+# Eles são reinstalados usando 'npm install'.
+node_modules/
+
+# Arquivos de IDEs e do Sistema Operacional
+.vscode/
+.idea/
+*.DS_Store

@@ -1,0 +1,151 @@
+<!-- frontend/blog.html -->
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- O título será atualizado pelo JavaScript -->
+    <title>Carregando Post... - RADAR PNCP</title>
+    <link rel="icon" type="image/png" href="./static/images/faviconRadar.ico">
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="./static/dist/main.css">
+</head>
+
+<!-- Botão Voltar ao Topo -->
+<button id="btnVoltarAoTopo" title="Voltar ao topo" class="btn btn-primary rounded-circle p-2 shadow">
+    <i class="bi bi-arrow-up-short" style="font-size: 1.5rem;"></i>
+</button>
+
+<!-- =============== BANNER DE CONSENTIMENTO DE COOKIES ====== -->
+<div id="cookieConsentBanner" class="cookie-banner">
+    <div class="cookie-content">
+        <p class="cookie-text">
+            Usamos cookies e armazenamento local para aprimorar sua experiência, como salvar suas licitações favoritas e filtros aplicados. Ao continuar, você concorda com o uso dessas tecnologias. Saiba mais em nossa 
+            <a href="/politica-cookies.html" target="_blank" rel="noopener noreferrer" >Política de Cookies</a>.
+        </p>
+        <div class="cookie-actions">
+            <button id="btnAceitarCookies" class="btn btn-primary btn-sm">Aceitar e Fechar</button>
+        </div>
+    </div>
+</div>
+
+<body class="page-blog">
+    <!-- Header -->
+    <header class="border-bottom"> 
+        <div class="container-fluid">
+            <!-- Desktop -->
+            <div class="d-none d-lg-flex flex-wrap align-items-center justify-content-between py-2">
+                <div class="logo-container" style="height: 45px; overflow: visible;">
+                    <a href="/"><img src="./static/images/logo.finnd.png" alt="RADAR PNCP Logo Desktop" height="45" id="logoDesktop"></a>
+                </div>
+                <nav class="ms-md-auto me-md-3">
+                    <ul class="nav nav-pills">
+                        <li class="nav-item"><a href="/" class="nav-link">INICIO</a></li>
+                        <li class="nav-item"><a href="/radar.html" class="nav-link">RADAR PNCP</a></li>
+                        <li class="nav-item"><a href="/blog.html" class="nav-link active">BLOG</a></li>
+                        <li class="nav-item"><a href="/contato.html" class="nav-link">CONTATO</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <!-- Mobile -->
+            <div class="d-lg-none text-center py-3">
+                <a href="/"><img src="./static/images/logo.finnd.png" alt="RADAR PNCP Logo Mobile" height="50" class="mb-2" id="logoMobile"></a>
+                <div class="dropdown position-absolute end-0 top-50 translate-middle-y me-3" style="z-index: 1050;">
+                    <button class="btn btn-outline-secondary btn-sm" type="button" id="mobileMenuButton" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-list"></i> Menu</button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mobileMenuButton">
+                        <li><a class="dropdown-item" href="/">INICIO</a></li>
+                        <li><a class="dropdown-item" href="/radar.html">RADAR PNCP</a></li>
+                        <li><a class="dropdown-item active" href="/blog.html">BLOG</a></li>
+                        <li><a class="dropdown-item" href="/contato.html">CONTATO</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content container-fluid mt-3">
+        <div class="container py-4">
+            <div class="row g-5">
+                <div class="col-lg-10">
+                    <header class="mb-4">
+                        <h1 class="display-6 fw-bold mb-2">Blog - RADAR PNCP</h1>
+                    </header>
+                    <!-- Indicador de carregamento exigido por blog.js -->
+                    <div id="loading-posts" class="text-center my-4" style="display:none;">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Carregando posts...</span>
+                        </div>
+                    </div>
+
+                    <!-- Aqui a lista de cards será injetada -->
+                    <div class="row gy-4" id="posts-container">
+                        </div>
+                        
+                    <!-- Contêiner para paginação -->
+                    <div id="pagination-container" class="d-flex justify-content-center mt-5"></div>
+
+                    <hr class="my-5">
+                    <div class="text-center">
+                        <a href="/" class="btn btn-outline-secondary"><i class="bi bi-arrow-left-short"></i> Voltar para ao Inicio</a>
+                    </div>
+                </div>
+
+                <div class="col-lg-2">
+                <div class="p-3 bg-light border rounded">
+                    <div class="sidebar-widget">
+                        <div class="sidebar-widget">
+                            <h4 class="widget-title">Busca no Blog</h4>
+                            <form id="blog-search-form">
+                                <div class="input-group">
+                                    <input type="text" name="q" class="form-control" placeholder="Procurar posts..." required>
+                                    <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="sidebar-widget mt-4">
+                        <h4 class="widget-title">Categorias</h4>
+                            <ol class="sidebar-list" id="category-list">
+                                <li><a href="#">Carregando...</a></li>
+                            </ol>
+                        </div>
+                        <div class="sidebar-widget">
+                            <h4 class="widget-title">Tags</h4>
+                            <div class="tag-cloud" id="tag-cloud">
+                                <span class="text-muted small">Carregando...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Anúncio -->
+                    <div class="sidebar-widget">
+                        <h4 class="widget-title">Publicidade</h4>
+                        <!-- Coloque seu código de anúncio ou imagem aqui -->
+                        <p class="text-muted small text-center">Espaço para anúncio</p>
+                    </div>
+                </div>            
+            </div>
+        </div>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="site-footer mt-auto">
+        <div class="container">
+             <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <p class="mb-0">© 2025 RADAR PNCP. Todos os direitos reservados.</p>
+                <ul class="nav">
+                    <li class="nav-item"><a href="/politica-privacidade.html" target="_blank" rel="noopener noreferrer" class="nav-link px-2">Política de Privacidade</a></li>
+                    <li class="nav-item"><a href="/politica-cookies.html" target="_blank" rel="noopener noreferrer" class="nav-link px-2">Política de Cookies</a></li>
+                </ul>
+            </div>
+        </div>        
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script> AOS.init(); </script>
+    <script src="./static/dist/main.js"></script>
+</body>
+</html>

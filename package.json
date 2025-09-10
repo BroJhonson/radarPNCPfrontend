@@ -1,0 +1,40 @@
+{
+  "name": "plataforma-licitacoes",
+  "version": "1.0.0",
+  "description": "O Radar PNCP é uma aplicação web desenvolvida em Flask (Python) que atua como uma interface amigável e poderosa para o Portal Nacional de Contratações Públicas (PNCP). O objetivo principal é facilitar a busca, filtragem e acompanhamento de licitações públicas, oferecendo uma experiência de usuário superior à do portal oficial.",
+  "main": "index.js",
+  "scripts": {
+    "// Scripts de Build (SASS e JS)": "---",
+    "build:css": "sass src/scss:static/dist",
+    "build:js:dev": "esbuild src/js/main.js --bundle --outfile=static/dist/main.js --define:process.env.NODE_ENV=\\\"development\\\"",
+    "build:js:prod": "esbuild src/js/main.js --bundle --minify --outfile=static/dist/main.js --define:process.env.NODE_ENV=\\\"production\\\"",
+
+    "// Scripts de Watch (observam mudanças)": "---",
+    "watch:css": "npm run build:css -- --watch",
+    "watch:js": "npm run build:js:dev -- --watch",
+
+    "// Scripts de Ambiente (desenvolvimento e produção)": "---",
+    "start:dev-server": "node server.js",
+    "dev": "concurrently \"npm:watch:*\" \"npm:start:dev-server\"",
+    
+    "// Build para Produção (minificado)": "---",
+    "build": "npm run build:css -- --style=compressed && npm run build:js:prod"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BroJhonson/plataforma-licitacoes.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "cross-env": "^10.0.0",
+    "dotenv": "^16.4.5",
+    "dotenv-cli": "^7.4.2",
+    "esbuild": "^0.21.4",
+    "express": "^4.19.2",
+    "nodemon": "^3.1.0",
+    "sass": "^1.77.2"
+  }
+}
