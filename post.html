@@ -58,7 +58,7 @@
     <main class="main-content container-fluid mt-3">
         <div class="container py-4">
             <div class="row g-5">
-                <div class="col-lg-10">
+                <div class="col-lg-9">
                     <nav aria-label="breadcrumb" class="mb-4">
                         <ol class="breadcrumb">
                             <li class="breadcrumb-item"><a href="/">Inicio</a></li>
@@ -97,31 +97,40 @@
                 </div>
 
                 <!-- Sidebar Estática (o conteúdo será preenchido pelo JS) -->
-                <div class="col-lg-2">
+                <aside class="col-lg-3 sidebar-blog">
                     <div class="position-sticky" style="top: 2rem;">
-                        <div class="sidebar-widget">
-                            <h4 class="widget-title">Busca no Blog</h4>
-                            <form id="blog-search-form">
-                                <div class="input-group">
-                                    <input type="text" name="q" class="form-control" placeholder="Procurar posts..." required>
-                                    <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                        <div class="p-3 bg-light border rounded">
+
+                            <div class="sidebar-widget">
+                                <h4 class="widget-title">Pesquisar</h4>
+                                <form id="blog-search-form">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" name="q" class="form-control" placeholder="Procurar posts..." required>
+                                        <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div class="sidebar-widget mt-4">
+                                <h4 class="widget-title">Categorias</h4>
+                                <ol class="sidebar-list" id="category-list">
+                                    <li class="text-muted small">Carregando...</li>
+                                </ol>
+                            </div>
+                            <div class="sidebar-widget mt-4">
+                                <h4 class="widget-title">Tags</h4>
+                                <div class="tag-cloud" id="tag-cloud">
+                                    <span class="text-muted small">Carregando...</span>
                                 </div>
-                            </form>
-                        </div>
-                        <div class="sidebar-widget">
-                            <h4 class="widget-title">Categorias</h4>
-                            <ol class="sidebar-list" id="category-list">
-                                <li class="text-muted small">Carregando...</li>
-                            </ol>
-                        </div>
-                        <div class="sidebar-widget">
-                            <h4 class="widget-title">Tags</h4>
-                            <div class="tag-cloud" id="tag-cloud">
-                                <span class="text-muted small">Carregando...</span>
                             </div>
                         </div>
+
+                        <div class="sidebar-widget mt-4 p-3 bg-light border rounded">
+                            <h4 class="widget-title">Publicidade</h4>
+                            <p class="text-muted small text-center">Espaço para anúncio</p>
+                        </div>                          
                     </div>
-                </div>
+                </aside>
             </div>
         </div>
     </main>

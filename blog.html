@@ -69,9 +69,9 @@
     <main class="main-content container-fluid mt-3">
         <div class="container py-4">
             <div class="row g-5">
-                <div class="col-lg-10">
+                <div class="col-lg-9">
                     <header class="mb-4">
-                        <h1 class="display-6 fw-bold mb-2">Blog - RADAR PNCP</h1>
+                        <h1 class="display-6 fw-bold mb-2">Portal de Conteúdo</h1>
                     </header>
                     <!-- Indicador de carregamento exigido por blog.js -->
                     <div id="loading-posts" class="text-center my-4" style="display:none;">
@@ -93,38 +93,40 @@
                     </div>
                 </div>
 
-                <div class="col-lg-2">
-                <div class="p-3 bg-light border rounded">
-                    <div class="sidebar-widget">
+                <aside class="col-lg-3 sidebar-blog">
+                    <div class="p-3 bg-light border rounded">
+                        
                         <div class="sidebar-widget">
-                            <h4 class="widget-title">Busca no Blog</h4>
+                            <h4 class="widget-title">Pesquisar</h4>
                             <form id="blog-search-form">
-                                <div class="input-group">
+                                <div class="input-group input-group-sm">
                                     <input type="text" name="q" class="form-control" placeholder="Procurar posts..." required>
                                     <button class="btn btn-primary" type="submit"><i class="bi bi-search"></i></button>
                                 </div>
                             </form>
                         </div>
+
                         <div class="sidebar-widget mt-4">
-                        <h4 class="widget-title">Categorias</h4>
+                            <h4 class="widget-title">Categorias</h4>
                             <ol class="sidebar-list" id="category-list">
                                 <li><a href="#">Carregando...</a></li>
                             </ol>
                         </div>
-                        <div class="sidebar-widget">
+                        
+                        <div class="sidebar-widget mt-4">
                             <h4 class="widget-title">Tags</h4>
                             <div class="tag-cloud" id="tag-cloud">
                                 <span class="text-muted small">Carregando...</span>
                             </div>
                         </div>
+
                     </div>
-                    <!-- Anúncio -->
-                    <div class="sidebar-widget">
+                    
+                    <div class="sidebar-widget mt-4 p-3 bg-light border rounded">
                         <h4 class="widget-title">Publicidade</h4>
-                        <!-- Coloque seu código de anúncio ou imagem aqui -->
                         <p class="text-muted small text-center">Espaço para anúncio</p>
-                    </div>
-                </div>            
+                    </div>                    
+                </aside>
             </div>
         </div>
     </main>

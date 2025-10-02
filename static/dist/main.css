@@ -793,8 +793,8 @@ body.page-home h3 {
     overflow-y: auto;
   }
   body.page-busca-licitacoes .offcanvas {
-    height: calc(100vh - 70px);
-    top: 70px;
+    height: 100vh;
+    top: 0;
   }
 }
 #espaco-anuncios-lateral {
@@ -1182,7 +1182,7 @@ body.page-home h3 {
   border-radius: 0.5rem;
 }
 .blog-sidebar .widget-title {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   margin-bottom: 1rem;
   font-style: normal;
@@ -1222,6 +1222,22 @@ body.page-home h3 {
 .tag-cloud .tag-item:hover {
   background-color: #4974a0;
   color: #dee2e6;
+}
+
+.page-blog header h1 {
+  font-size: 2rem;
+}
+
+@media (min-width: 992px) {
+  .sidebar-blog {
+    flex: 0 0 20%;
+    max-width: 20%;
+  }
+  .page-blog .col-lg-9,
+  .page-post-individual .col-lg-9 {
+    flex: 0 0 80%;
+    max-width: 80%;
+  }
 }
 
 /*# sourceMappingURL=main.css.map */

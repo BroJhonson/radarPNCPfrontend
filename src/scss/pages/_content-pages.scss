@@ -97,8 +97,8 @@
     border-radius: $border-radius;
   }
 
-  .widget-title {
-    font-size: 1.1rem;      // << Tamanho da fonte reduzido
+  .widget-title { // Titulo
+    font-size: 1.0rem;      // << Tamanho da fonte reduzido
     font-weight: $font-weight-bold;
     margin-bottom: 1rem;
     font-style: normal;     // << Remove o itálico
@@ -141,5 +141,29 @@
       background-color: #4974a0;
       color: #dee2e6;
     }
+  }
+}
+
+// ESTILO DO PARA O TÍTULO DA PÁGINA DO BLOG
+.page-blog header h1 {
+    // A classe .display-6 tem 3rem. Um valor menor como 2.5rem ou 2rem funcionará.
+    font-size: 2.0rem; 
+}
+
+// Estilo da coluna da barra lateral
+@media (min-width: 992px) { 
+  .sidebar-blog {
+    // col-lg-2 equivale a 16.66% de largura.
+    // col-lg-3 equivale a 25% de largura.
+    // Vamos usar 20%, um bom valor intermediário. Ajuste se precisar.
+    flex: 0 0 20%;
+    max-width: 20%;
+  }
+
+  // É uma boa prática ajustar a coluna principal também
+  .page-blog .col-lg-9,
+  .page-post-individual .col-lg-9 {
+      flex: 0 0 80%;
+      max-width: 80%;
   }
 }
