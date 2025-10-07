@@ -5,7 +5,7 @@
 const isProduction = process.env.NODE_ENV === 'production';
 
 // As URLs agora estão diretamente no código, não vêm mais do .env para o build.
-const API_BASE_URL_PROD = "https://api.seusite.com"; // <-- ALTERE PARA SUA URL DE PRODUÇÃO REAL
+const API_BASE_URL_PROD = "https://api.finnd.com.br/"; // URL DE PRODUÇÃO REAL
 const API_BASE_URL_DEV = "http://localhost:5000";   // URL para desenvolvimento local
 
 // O script escolhe a URL correta com base no ambiente injetado.
