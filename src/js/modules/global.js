@@ -17,7 +17,7 @@ function debounce(func, wait, immediate) {
 
 
 export function setupGlobalFeatures() {
-    console.log("Configurando funcionalidades globais...");
+    // console.log("Configurando funcionalidades globais...");
 
     // --- LÓGICA PARA POSICIONAR O PAINEL DE FEEDBACK ---
     const templateFeedback = document.getElementById('template-painel-feedback');
@@ -116,7 +116,7 @@ export function setupGlobalFeatures() {
 
     // --- LÓGICA ESPECÍFICA DA HOME PAGE ---
     if (document.body.classList.contains('page-home')) {
-        console.log("Lógica da Home Page (acordeão) iniciada.");
+        // console.log("Lógica da Home Page (acordeão) iniciada.");
         const accordionCards = document.querySelectorAll('.accordion-card');
         const isMobile = () => window.innerWidth <= 767;
 

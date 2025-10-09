@@ -82,7 +82,7 @@ export default async function initPostPage() {
         // --- FIM DO CÓDIGO MOVIDO E CORRIGIDO ---
 
     } catch (error) {
-        console.error("Erro ao carregar post:", error);
+        // console.error("Erro ao carregar post:", error);
         document.title = "Erro - RADAR PNCP";
         titleElement.textContent = 'Ocorreu um Erro';
         contentElement.innerHTML = `<p class="text-center text-danger">Não foi possível carregar o conteúdo do post. Causa: ${error.message}</p>`;

@@ -66,7 +66,7 @@ async function loadSidebarData() {
             ).join('');
         }
     } catch (error) {
-        console.error("Erro ao carregar categorias:", error);
+        // console.error("Erro ao carregar categorias:", error);
         categoryList.innerHTML = '<li>Falha ao carregar.</li>';
     }
 
@@ -80,7 +80,7 @@ async function loadSidebarData() {
             ).join(' ');
         }
     } catch (error) {
-        console.error("Erro ao carregar tags:", error);
+        // console.error("Erro ao carregar tags:", error);
         tagCloud.innerHTML = '<span class="text-danger">Falha ao carregar.</span>';
     }
 }
@@ -185,7 +185,7 @@ async function fetchAndDisplayPosts() {
         }
 
     } catch (error) {
-        console.error("Erro ao buscar posts:", error);
+        // console.error("Erro ao buscar posts:", error);
         postsContainer.innerHTML = '<p class="text-center text-danger">Falha ao carregar os posts.</p>';
     } finally {
         loadingIndicator.style.display = 'none';
@@ -281,7 +281,7 @@ export default async function initBlogPage() {
         }
 
     } catch (error) {
-        console.error("Erro ao buscar posts:", error);
+        // console.error("Erro ao buscar posts:", error);
         postsContainer.innerHTML = '<p class="text-center text-danger">Falha ao carregar os posts.</p>';
     } finally {
         loadingIndicator.style.display = 'none';

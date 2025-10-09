@@ -47,7 +47,7 @@ export default async function initHomePage() {
         }
 
     } catch (error) {
-        console.error("Erro ao buscar posts em destaque:", error);
+        // console.error("Erro ao buscar posts em destaque:", error);
         container.innerHTML = '<p class="text-danger col-12 text-center">Não foi possível carregar os artigos.</p>';
     }
 }

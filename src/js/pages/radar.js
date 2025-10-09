@@ -6,7 +6,7 @@ import { API_BASE_URL } from '../config.js'; // Nosso "GPS"
 
 // 2. Envolver toda a lógica da página em uma função principal
 export default function initRadarPage() {
-    console.log("Página Radar: Inicializando funcionalidades...");
+    // console.log("Página Radar: Inicializando funcionalidades...");
 
     // Elementos do DOM
     const filtrosAtivosContainer = document.getElementById('filtrosAtivosContainer');
@@ -84,7 +84,7 @@ export default function initRadarPage() {
                 });
             }
         } catch (e) {
-            console.error("Erro ao formatar data e hora:", dateTimeString, e);
+            // console.error("Erro ao formatar data e hora:", dateTimeString, e);
             return 'Formato Inválido';
         }
     };
@@ -123,7 +123,7 @@ export default function initRadarPage() {
             const [orderByField, orderDirValue] = ordenarPorSelect.value.split('_');
             params.append('orderBy', orderByField);
             params.append('orderDir', orderDirValue.toUpperCase());
-            console.log("Exportando com os seguintes parâmetros:", params.toString());
+            // console.log("Exportando com os seguintes parâmetros:", params.toString());
             const url = `/api/exportar-csv?${params.toString()}`;
             window.open(url, '_blank');
         });
@@ -132,7 +132,7 @@ export default function initRadarPage() {
     if (offcanvasFiltrosBody) {
         offcanvasFiltrosBody.addEventListener('keydown', function(event) {
             if ((event.key === 'Enter' || event.key === 'NumpadEnter') && (event.ctrlKey || event.metaKey)) {
-                console.log("Ctrl+Enter pressionado, aplicando filtros...");
+                // console.log("Ctrl+Enter pressionado, aplicando filtros...");
                 event.preventDefault();
                 buscarLicitacoes(1);
                 const offcanvasFiltrosElement = document.getElementById('offcanvasFiltros');
@@ -148,7 +148,7 @@ export default function initRadarPage() {
             if (event.target.classList.contains('btn-limpar-grupo')) {
                 const tipoLimpeza = event.target.dataset.limpar;
                 //console.log("Limpando filtro:", tipoLimpeza);
-                console.log(`[DEBUG] 🖱️ Clique no 'X' do GRUPO '${tipoLimpeza}'`);
+                //console.log(`[DEBUG] 🖱️ Clique no 'X' do GRUPO '${tipoLimpeza}'`);
                 let estadoAlterado = false;
 
                 switch (tipoLimpeza) {
@@ -198,7 +198,7 @@ export default function initRadarPage() {
     }
 
     function renderTags(palavrasArray, containerElement, tipo) {
-        console.log(`[DEBUG] 🎨 RENDERIZANDO TAGS para '${tipo}'. Dados:`, JSON.stringify(palavrasArray));
+        // console.log(`[DEBUG] 🎨 RENDERIZANDO TAGS para '${tipo}'. Dados:`, JSON.stringify(palavrasArray));
         if (!containerElement) return;
         containerElement.innerHTML = '';
         palavrasArray.forEach((palavra, index) => {
@@ -226,7 +226,7 @@ export default function initRadarPage() {
     }
 
     function addPalavraChave(inputField, palavrasArray, containerElement, tipo) {
-        console.log(`[DEBUG] 📥 Adicionando palavra-chave para '${tipo}'...`);
+        // console.log(`[DEBUG] 📥 Adicionando palavra-chave para '${tipo}'...`);
         if (!inputField) return;
         const termos = inputField.value.trim();
         if (termos) {
@@ -397,7 +397,7 @@ export default function initRadarPage() {
     }
 
     function salvarFiltrosAtuais() {
-        console.log('[DEBUG] 💾 SALVANDO FILTROS no localStorage...');
+        // console.log('[DEBUG] 💾 SALVANDO FILTROS no localStorage...');
         const filtros = {
             palavrasChaveInclusao: palavrasChaveInclusao,
             palavrasChaveExclusao: palavrasChaveExclusao,
@@ -415,23 +415,20 @@ export default function initRadarPage() {
             itensPorPagina: itensPorPaginaSelect.value,
         };
         localStorage.setItem(FILTROS_KEY, JSON.stringify(filtros));        
-        console.log('[DEBUG] ✅ Filtros salvos. Estado atual:', {
-            inclusao: palavrasChaveInclusao,
-            exclusao: palavrasChaveExclusao
-        });
-        console.log('[DEBUG] localStorage agora contém:', localStorage.getItem(FILTROS_KEY));
+        // console.log('[DEBUG] ✅ Filtros salvos. Estado atual:', {inclusao: palavrasChaveInclusao,exclusao: palavrasChaveExclusao});
+        // console.log('[DEBUG] localStorage agora contém:', localStorage.getItem(FILTROS_KEY));
     }
 
     function carregarFiltrosSalvos() {
-        console.log('[DEBUG] 🔄 CARREGANDO FILTROS do localStorage...');
+        // console.log('[DEBUG] 🔄 CARREGANDO FILTROS do localStorage...');
         const filtrosSalvosJson = localStorage.getItem(FILTROS_KEY);
         if (!filtrosSalvosJson) {
-            console.log("Nenhum filtro salvo encontrado.");
+            // console.log("Nenhum filtro salvo encontrado.");
             return;
         }
         try {
             const filtros = JSON.parse(filtrosSalvosJson);
-            console.log("Carregando filtros salvos:", filtros);
+            // console.log("Carregando filtros salvos:", filtros);
             if (filtros.palavrasChaveInclusao) {
                 palavrasChaveInclusao = filtros.palavrasChaveInclusao;
                 renderTags(palavrasChaveInclusao, tagsPalavraInclusaoContainer, 'inclusao');
@@ -475,7 +472,7 @@ export default function initRadarPage() {
             if (filtros.ordenacao) ordenarPorSelect.value = filtros.ordenacao;
             if (filtros.itensPorPagina) itensPorPaginaSelect.value = filtros.itensPorPagina;
         } catch (e) {
-            console.error("[DEBUG] ❌ Erro ao carregar/parsear filtros:", e);            
+            // console.error("[DEBUG] ❌ Erro ao carregar/parsear filtros:", e);            
             localStorage.removeItem(FILTROS_KEY);
         }
     }
@@ -631,7 +628,7 @@ export default function initRadarPage() {
                         }
                     }
                 } catch (error) {
-                    console.error("Erro ao buscar favorito para sidebar:", error);
+                    // console.error("Erro ao buscar favorito para sidebar:", error);
                 }
             }
             if (licData) {
@@ -686,7 +683,7 @@ export default function initRadarPage() {
                 modalidadesContainer.innerHTML = '<small class="text-danger">Nenhuma modalidade encontrada.</small>';
             }
         } catch (error) {
-            console.error("Erro ao carregar modalidades:", error);
+            // console.error("Erro ao carregar modalidades:", error);
             modalidadesContainer.innerHTML = `<small class="text-danger">Erro ao carregar modalidades: ${error.message}</small>`;
         }
         updateModalidadeSelectedCount();
@@ -734,7 +731,7 @@ export default function initRadarPage() {
                 statusContainer.innerHTML = '<small class="text-danger">Nenhum status encontrado.</small>';
             }
         } catch (error) {
-            console.error("Erro ao carregar status radar:", error);
+            // // console.error("Erro ao carregar status radar:", error);
             statusContainer.innerHTML = `<small class="text-danger">Erro ao carregar status: ${error.message}</small>`;
         }
     }
@@ -782,7 +779,7 @@ export default function initRadarPage() {
             try {
                 const response = await fetch(`${API_BASE_URL}/api/ibge/municipios/${uf}`);
                 const data = await response.json();
-                console.log(`Resposta da API para UF ${uf}:`, data);
+                // console.log(`Resposta da API para UF ${uf}:`, data);
                 if (!response.ok) {
                     ufsComErro.push(uf);
                     continue;
@@ -796,7 +793,7 @@ export default function initRadarPage() {
                     });
                 });
             } catch (error) {
-                console.error(`Erro crítico ao carregar municípios para ${uf}:`, error);
+                // console.error(`Erro crítico ao carregar municípios para ${uf}:`, error);
                 ufsComErro.push(uf);
             }
         }
@@ -836,7 +833,7 @@ export default function initRadarPage() {
     }
 
     async function buscarLicitacoes(page = 1) {
-        console.log(`[DEBUG] 📡 BUSCANDO LICITAÇÕES... Página: ${page}`);
+        // console.log(`[DEBUG] 📡 BUSCANDO LICITAÇÕES... Página: ${page}`);
         salvarFiltrosAtuais();
 
         const btnAplicar = document.getElementById('btnBuscarLicitacoes');
@@ -907,14 +904,14 @@ export default function initRadarPage() {
         totalRegistrosInfo.textContent = '-';
         exibicaoInfo.textContent = '';
         try {
-            console.log("[DEBUG] ⚙️ Parâmetros da API:", params.toString());
+            // console.log("[DEBUG] ⚙️ Parâmetros da API:", params.toString());
             const apiUrl = `${API_BASE_URL}/api/licitacoes?${params.toString()}`;
-            console.log("[DEBUG] Chamando API em:", apiUrl);
+            // console.log("[DEBUG] Chamando API em:", apiUrl);
             const response = await fetch(apiUrl);
             
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
-                console.error("Erro da API:", response.status, errorData);
+                // console.error("Erro da API:", response.status, errorData);
                 let errorMessage = `Erro ${response.status}`;
                 if (response.status === 400 && errorData.erro) {
                     errorMessage = `Erro de validação: ${errorData.erro}${errorData.detalhes ? ' ('+errorData.detalhes+')' : ''}`;
@@ -930,7 +927,7 @@ export default function initRadarPage() {
                 throw new Error(`Erro na API: ${response.status}`);
             }
             const data = await response.json();
-            console.log("[DEBUG] ✅ Dados recebidos da API:", data);
+            // console.log("[DEBUG] ✅ Dados recebidos da API:", data);
             renderLicitacoesTable(data.licitacoes);
             renderPagination(data);
             atualizarExibicaoFiltrosAtivos();
@@ -946,7 +943,7 @@ export default function initRadarPage() {
                 }
             }
         } catch (error) {
-            console.error("[DEBUG] 💥 Erro crítico ao buscar licitações:", error);
+            // console.error("[DEBUG] 💥 Erro crítico ao buscar licitações:", error);
             licitacoesTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Erro ao buscar licitações: ${error.message}</td></tr>`;
             totalRegistrosInfo.textContent = '0';
             exibicaoInfo.textContent = 'Erro';
@@ -957,7 +954,7 @@ export default function initRadarPage() {
                 btnAplicar.disabled = false;
                 btnAplicar.innerHTML = `<i class="bi bi-search"></i> Aplicar Filtros`;
             }
-            console.log("[DEBUG] 🏁 Fim da busca.");
+            // console.log("[DEBUG] 🏁 Fim da busca.");
         }
     }
 
@@ -970,8 +967,8 @@ export default function initRadarPage() {
         }
         // DEBUG: Logar a primeira licitação para ver o formato dos dados
         if (licitacoes.length > 0) {
-            console.log("[DEBUG] Formato do objeto da primeira licitação:", licitacoes[0]);
-            console.log("[DEBUG] Tipo de 'dataAtualizacao':", typeof licitacoes[0].dataAtualizacao);
+            // console.log("[DEBUG] Formato do objeto da primeira licitação:", licitacoes[0]);
+            // console.log("[DEBUG] Tipo de 'dataAtualizacao':", typeof licitacoes[0].dataAtualizacao);
         }
         licitacoes.forEach(lic => {
             const tr = document.createElement('tr');
@@ -1157,12 +1154,12 @@ export default function initRadarPage() {
     }
 
     function limparFiltros() {
-        console.log('[DEBUG] 🗑️ INICIANDO LIMPEZA TOTAL DE FILTROS...');
+        // console.log('[DEBUG] 🗑️ INICIANDO LIMPEZA TOTAL DE FILTROS...');
 
         if (palavraChaveInclusaoInputField) palavraChaveInclusaoInputField.value = '';
         if (palavraChaveExclusaoInputField) palavraChaveExclusaoInputField.value = '';
 
-        console.log('[DEBUG] Limpando arrays de palavras-chave em memória...');
+        // console.log('[DEBUG] Limpando arrays de palavras-chave em memória...');
         palavrasChaveInclusao = [];
         palavrasChaveExclusao = [];
         renderTags(palavrasChaveInclusao, tagsPalavraInclusaoContainer, 'inclusao');
@@ -1200,11 +1197,11 @@ export default function initRadarPage() {
             new bootstrap.Collapse(advancedCollapse).hide();
         }
         
-        //console.log("Filtros limpos, salvando estado limpo e buscando licitações...");
-        console.log('[DEBUG] Chamando salvarFiltrosAtuais() após zerar os arrays...');
+        //// console.log("Filtros limpos, salvando estado limpo e buscando licitações...");
+        // console.log('[DEBUG] Chamando salvarFiltrosAtuais() após zerar os arrays...');
         salvarFiltrosAtuais();
 
-        console.log('[DEBUG] Limpeza concluída. Acionando nova busca...');
+        // console.log('[DEBUG] Limpeza concluída. Acionando nova busca...');
         atualizarExibicaoFiltrosAtivos();
         buscarLicitacoes(1);
     }
@@ -1230,10 +1227,10 @@ export default function initRadarPage() {
                 throw new Error(errorData.erro_backend || errorData.erro_frontend || `Erro ${response.status}`);
             }
             const data = await response.json();
-            console.log("[DEBUG] Dados de DETALHES recebidos para PNCP ID:", pncpId, JSON.parse(JSON.stringify(data)));
+            // console.log("[DEBUG] Dados de DETALHES recebidos para PNCP ID:", pncpId, JSON.parse(JSON.stringify(data)));
             renderDetailsPanelContent(data);
         } catch (error) {
-            console.error("Erro ao buscar detalhes da licitação:", error);
+            // console.error("Erro ao buscar detalhes da licitação:", error);
             detailsPanelContent.innerHTML = `<p class="text-center text-danger">Erro ao carregar detalhes: ${error.message}</p>`;
         }
     }
@@ -1524,7 +1521,7 @@ export default function initRadarPage() {
     }
 
     async function inicializarPagina() {
-        console.log('[DEBUG] 🏁 INICIALIZANDO A PÁGINA...');
+        // console.log('[DEBUG] 🏁 INICIALIZANDO A PÁGINA...');
         popularUFs();
         await popularModalidades();
         await popularStatus();
@@ -1554,12 +1551,12 @@ export default function initRadarPage() {
         if (btnAtualizarTabela) {
             btnAtualizarTabela.disabled = false;
             btnAtualizarTabela.addEventListener('click', () => {
-                console.log("Botão Atualizar Tabela clicado - Refazendo busca para página:", currentPage);
+                // console.log("Botão Atualizar Tabela clicado - Refazendo busca para página:", currentPage);
                 if (currentPage < 1) currentPage = 1;
                 buscarLicitacoes(currentPage);
             });
         }
-        console.log('[DEBUG] ✅ Página inicializada e listeners configurados.');
+        // console.log('[DEBUG] ✅ Página inicializada e listeners configurados.');
     }
 
     // --- INICIA A EXECUÇÃO ---

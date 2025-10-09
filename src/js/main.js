@@ -8,7 +8,7 @@ import initContatoPage from './pages/contato.js';
 import initHomePage from './pages/home.js';
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM Carregado. Orquestrador JS iniciado.");
+    // console.log("DOM Carregado. Orquestrador JS iniciado.");
 
     // 1. Executa funcionalidades globais em todas as páginas
     setupGlobalFeatures();

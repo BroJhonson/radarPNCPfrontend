@@ -63,7 +63,7 @@ export default function initContatoPage() {
 
         } catch (error) {
             // Erro! Mostra uma mensagem de falha
-            console.error('Erro ao enviar formulário:', error);
+            // console.error('Erro ao enviar formulário:', error);
             alertPlaceholder.append(createAlert(error.message, 'danger'));
         } finally {
             // Reabilita o botão com o texto original, independentemente do resultado
