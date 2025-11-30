@@ -1,0 +1,262 @@
+<!-- frontend/index.html -->
+<!doctype html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Radar PNCP – Busque e Acompanhe Licitações Públicas Gratuitamente</title>
+    <link rel="icon" type="image/png" href="./static/images/faviconRadar.ico">
+    
+    <!-- === ALTERAÇÕES AQUI === -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- O caminho agora é direto para a pasta dist -->
+    <link rel="stylesheet" href="./static/dist/main.css">
+    <!-- === FIM DAS ALTERAÇÕES === -->
+</head>
+
+<!-- Botão Voltar ao Topo -->
+<button id="btnVoltarAoTopo" title="Voltar ao topo" class="btn btn-primary rounded-circle p-2 shadow">
+    <i class="bi bi-arrow-up-short" style="font-size: 1.5rem;"></i>
+</button>
+
+<!-- =============== BANNER DE CONSENTIMENTO DE COOKIES ====== -->
+<div id="cookieConsentBanner" class="cookie-banner">
+    <div class="cookie-content">
+        <p class="cookie-text">
+            Usamos cookies e armazenamento local para aprimorar sua experiência, como salvar suas licitações favoritas e filtros aplicados. Ao continuar, você concorda com o uso dessas tecnologias. Saiba mais em nossa 
+            <a href="/politica-cookies.html" target="_blank" rel="noopener noreferrer" >Política de Cookies</a>.
+        </p>
+        <div class="cookie-actions">
+            <button id="btnAceitarCookies" class="btn btn-primary btn-sm">Aceitar e Fechar</button>
+        </div>
+    </div>
+</div>
+
+<body class="page-home">
+
+    <!-- Conteúdo do Header (de base.html) -->
+    <header class="border-bottom"> 
+        <div class="container-fluid">
+            <!-- Estrutura para Desktop -->
+            <div class="d-none d-lg-flex flex-wrap align-items-center justify-content-between py-2">
+                <div class="logo-container" style="height: 45px; overflow: visible;">
+                    <!-- === ALTERAÇÕES AQUI === -->
+                    <a href="/">
+                        <img src="./static/images/logo.finnd.png" alt="RADAR PNCP Logo Desktop" height="45" id="logoDesktop">
+                        <img src="./static/images/logo.png" alt="RADAR PNCP Logo Busca" height="45" id="logoBuscaLicitacoes" style="display: none;">
+                    </a>                    
+                </div>
+                <nav class="ms-md-auto me-md-3">
+                    <ul class="nav nav-pills">
+                        <!-- Links diretos para os arquivos HTML -->
+                        <li class="nav-item"><a href="/" class="nav-link active">INICIO</a></li>
+                        <li class="nav-item"><a href="/radar.html" class="nav-link">RADAR PNCP</a></li>
+                        <li class="nav-item"><a href="/blog.html" class="nav-link">BLOG</a></li>
+                        <li class="nav-item"><a href="/contato.html" class="nav-link">CONTATO</a></li>
+                    </ul>
+                </nav>
+            </div>
+            <!-- Estrutura para Mobile -->
+            <div class="d-lg-none text-center py-3">
+                 <a href="/">
+                    <img src="./static/images/logo.finnd.png" alt="RADAR PNCP Logo Mobile" height="50" class="mb-2" id="logoMobile">
+                    <img src="./static/images/logo.png" alt="RADAR PNCP Logo Busca Mobile" height="50" class="mb-2" id="logoBuscaLicitacoesMobile" style="display: none;">
+                </a>
+                <div class="dropdown position-absolute end-0 top-50 translate-middle-y me-3" style="z-index: 1050;">
+                    <button class="btn btn-outline-secondary btn-sm" type="button" id="mobileMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-list"></i> Menu
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="mobileMenuButton">
+                        <li><a class="dropdown-item active" href="/">INICIO</a></li>
+                        <li><a class="dropdown-item" href="/radar.html">RADAR PNCP</a></li>
+                        <li><a class="dropdown-item" href="/blog.html">BLOG</a></li>
+                        <li><a class="dropdown-item" href="/contato.html">CONTATO</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content container-fluid mt-3">
+        <!-- Conteúdo específico de index.html (copiado do seu template) -->
+        <section class="hero" data-aos="fade-in">
+            <div class="site-wrapper">
+                <div class="container text-center" data-aos="fade-up">
+                    <h1 class="hero-title display-4 fw-bold" data-aos-delay="100">
+                        Você encontrou! A ferramenta <span class="destaque-laranja">gratuita</span> que vai <span class="destaque-laranja">facilitar</span> sua busca pelas melhores licitações públicas.
+                    </h1>
+                    <p class="lead mt-3 texto-subtitulo" data-aos-delay="300">
+                        Busque com precisão, analise com agilidade! O Radar PNCP traz filtros avançados para refinar sua pesquisa, 
+                        preview completo dos editais na mesma tela e sistema de favoritos para acompanhar as melhores oportunidades.<br>
+                        Menos cliques, mais eficiência.
+                    </p>
+                    <!-- === ALTERAÇÃO AQUI === -->
+                    <a href="/radar.html" class="btn btn-primary btn-lg mt-4 botao-destaque" data-aos-delay="500">Acessar Agora</a>
+                </div>
+            </div>
+        </section>
+        
+        
+
+        <!-- NOVA SEÇÃO: Nossa Missão -->
+        <section class="nossa-missao py-5 bg-light" data-aos="fade-up">
+            <div class="container text-center">
+                <h2 class="fw-bold mb-4">Nossa Missão</h2>
+                <p class="lead">
+                    O objetivo principal é simplificar e agilizar a busca, filtragem e acompanhamento de licitações públicas,
+                    oferecendo uma experiência de usuário superior à do portal oficial.
+                </p>
+                <div class="mt-4">
+                    <img src="./static/images/preview-radar.png" 
+                        alt="Preview do Radar PNCP" 
+                        class="img-fluid shadow rounded" 
+                        style="max-width: 800px;">
+                </div>
+                <a href="./radar.html" class="btn btn-primary btn-lg">
+                    Experimente Gratuitamente
+                </a>
+            </div>
+        </section>
+
+        <!-- 2. Seção de Benefícios -->
+        <section class="features">
+            <div class="container">
+                <div class="text-center mb-5" data-aos="fade-up">
+                    <h2 class="fw-bold">Tudo o que você precisa em um só lugar</h2>
+                </div>
+                
+                <div class="accordion-horizontal-container" data-aos="fade-up" data-aos-delay="200">
+                    <div class="accordion-card">
+                        <div class="card-content">                    
+                            <h3>Filtros Inteligentes</h3>
+                            <div class="hidden-content">
+                                <p>Encontre as licitações mais relevantes ao combinar palavras-chave e excluir termos irrelevantes. 
+                                Refine por valor, data, modalidade, status e muito mais.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-card active">
+                        <div class="card-content">                    
+                            <h3>Informação Direta</h3>
+                            <div class="hidden-content">
+                                <p>Todos os dados relevantes organizados de forma intuitiva e clara, 
+                                tudo na mesma página, para análise rápida.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="accordion-card">
+                        <div class="card-content">
+                            <h3>Agilidade e Atualização</h3>
+                            <div class="hidden-content">
+                                <p>Conectado diretamente ao Portal Nacional de Compras Públicas, o Radar busca 
+                                e organiza novas oportunidades constantemente.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA Intermediário -->
+                <div class="text-center mt-5">
+                    <a href="./radar.html" class="btn btn-primary btn-lg">Começar a Buscar Agora</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Seção "Por que gratuito?" -->
+        <section class="how-it-works">
+            <div class="container text-center" data-aos="fade-up">
+                <h2 class="fw-bold" data-aos="fade-up">Por que é gratuito?</h2>
+                <div class="row g-5 mt-4 align-items-center">
+                    <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                        <div class="step-card">
+                            <div class="step-number">1</div>
+                            <h3>Informação Pública</h3>
+                            <p>Se já é gratuita, por que pagar para encontrá-la mais rápido?</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                        <div class="step-card">
+                            <div class="step-number">2</div>
+                            <h3>Democratizando o Acesso</h3>
+                            <p>Queremos que qualquer pessoa ou empresa tenha acesso simples e rápido às licitações públicas.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                        <div class="step-card">
+                            <div class="step-number">3</div>
+                            <h3>Impacto Positivo</h3>
+                            <p>Nosso objetivo é ajudar o maior número possível de empresas a conquistar contratos públicos.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Seção dos artigos -->
+        <section class="blog-destaques py-5" data-aos="fade-up">
+            <div class="container">
+                <h2 class="text-center fw-bold mb-5">Aproveite e confira nossos artigos em destaque!</h2>
+                <div class="row g-4">
+                    
+                    <!-- Post 1 -->
+                    <div class="row g-4" id="destaques-blog-container">
+                        <div class="card blog-card h-100">
+                            <img src="./static/images/artigo1.jpg" class="card-img-top" alt="Como participar de licitações">
+                            <div class="card-body">
+                                <h5 class="card-title">Como participar de licitações</h5>
+                                <p class="card-text">Um guia prático para empresas que querem começar no setor público.</p>
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. CTA Final -->
+        <img src="./static/images/predios.png" alt="Imagem fina decorativa" class="img-fluid faixa-final-cta">
+        <section class="final-cta text-center" data-aos="zoom-in">
+            <div class="container">
+                <h2 class="display-5 fw-bold">Pronto para fechar mais negócios com o setor público?</h2>
+                <p class="lead mt-3 paragrafo-cta">Não precisa de cartão de crédito, login ou cadastro. É só acessar e começar a usar!</p>
+                <a href="./radar.html" class="btn btn-primary btn-lg mt-4">Usar o Radar PNCP Gratuitamente</a>
+                <div class="mt-4">
+                    <a href="./blog.html" class="btn btn-outline-light btn-sm">Ver mais artigos</a>
+                </div>
+                <p class="lead mt-3 paragrafo-blog">
+                    Aprenda como sua empresa pode participar de licitações públicas de forma segura e eficiente. <br> 
+                    Acesse nosso blog e explore conteúdos práticos e gratuitos para simplificar o processo e aproveitar as melhores oportunidades. 
+                </p>
+            </div>
+        </section>        
+    </main>
+
+    <!-- Conteúdo do Footer (de base.html) -->
+    <footer class="site-footer mt-auto">
+        <div class="container">
+             <div class="d-flex flex-wrap justify-content-between align-items-center">
+                <p class="mb-0">© 2025 RADAR PNCP. Todos os direitos reservados.</p>
+                <ul class="nav">                    
+                    <li class="nav-item"><a href="/politica-privacidade.html" target="_blank" rel="noopener noreferrer" class="nav-link px-2">Política de Privacidade</a></li>
+                    <li class="nav-item"><a href="/politica-cookies.html" target="_blank" rel="noopener noreferrer" class="nav-link px-2">Política de Cookies</a></li>
+                </ul>
+            </div>
+        </div>        
+    </footer>
+
+    <!-- Scripts (de base.html) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 1000, once: true, offset: 120 });
+    </script>
+    
+    <script src="./static/dist/main.js"></script>
+</body>
+</html>
