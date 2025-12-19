@@ -50,24 +50,59 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+        .site-footer .nav-link {
+            color: #ffffff !important; /* branco */
+            text-decoration: none;     /* opcional: remove sublinhado */
+        }
+
+        .site-footer .nav-link:hover {
+            color: #f7931a; /* opcional: cor laranja ao passar o mouse */
+        }
+        .site-footer .nav {
+            list-style: none;       /* remove os marcadores (pontos) */
+            padding-left: 0;        /* remove o recuo padrão */
+        }
+
+        .site-footer .nav-link {
+            color: #ffffff !important;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Ícone de engrenagem girando -->
-        <div class="icon">
-            <i class="bi bi-gear-wide-connected"></i>
-        </div>
-        
-        <h1>Estamos em Manutenção</h1>
-        <p>
-            Estamos realizando melhorias importantes na plataforma para aprimorar sua experiência. O FINND estará de volta em breve, mais rápido e eficiente do que nunca.
-        </p>
-        <p>Agradecemos a sua paciência!</p>
+    <main>
+        <div class="container">
+            <!-- Ícone de engrenagem girando -->
+            <div class="icon">
+                <i class="bi bi-gear-wide-connected"></i>
+            </div>
+            
+            <h1>Estamos em Manutenção</h1>
+            <p>
+                Estamos realizando melhorias importantes na plataforma para aprimorar sua experiência. O FINND estará de volta em breve, mais rápido e eficiente do que nunca.
+            </p>
+            <p>Agradecemos a sua paciência!</p>
 
-        <div class="contato">
-            <p>Se precisar de ajuda urgente, entre em contato: <a href="mailto:suporte@contato.finnd.com.br">suporte@contato.finnd.com.br</a></p>
+            <div class="contato">
+                <p>Se precisar de ajuda urgente, entre em contato: <a href="mailto:suporte@contato.finnd.com.br">suporte@contato.finnd.com.br</a></p>
+            </div>
         </div>
-    </div>
+    
+    
+        <footer class="site-footer mt-auto">
+            <div class="container">
+                <div class="d-flex flex-wrap justify-content-between align-items-center">
+                    <p class="mb-0">© 2025 FINND. Todos os direitos reservados.</p>
+                    <ul class="nav">                    
+                        <li class="nav-item"><a href="/politica-de-privacidade.html" class="nav-link px-2">Política de Privacidade</a></li>
+                        <li class="nav-item"><a href="/termos-de-uso.html" class="nav-link px-2">Termos de uso</a></li>
+                    </ul>
+                </div>
+            </div>        
+        </footer>
+        
+    </main>
+
 </body>
+
 </html>

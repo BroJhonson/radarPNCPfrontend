@@ -1,0 +1,11 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "br.com.radarpncp.radar_pncp_app",
+      "sha256_cert_fingerprints":
+        ["7E:FB:A0:CF:85:D3:55:74:38:D2:98:5D:38:4E:B1:F2:31:09:64:42:DB:C9:B4:C7:A8:B8:2D:F8:FB:49:11:96"]
+    }
+  }
+]
