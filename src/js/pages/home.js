@@ -1,6 +1,6 @@
 // frontend/src/js/pages/home.js
 
-import { API_BASE_URL } from '../config.js';
+import api from '../services/api.js';
 import { decodeHtml } from '../modules/utils.js';
 
 // Função para criar o HTML de um único card de post
@@ -35,9 +35,7 @@ export default async function initHomePage() {
     if (!container) return;
 
     try {
-        // ### CORREÇÃO AQUI: Chamando a nova rota da API ###
-        const response = await fetch(`${API_BASE_URL}/api/posts/destaques`);
-        const data = await response.json();
+        const data = await api.buscarPostsDestaque();
 
         if (data.posts && data.posts.length > 0) {
             const postsHtml = data.posts.map(createPostCard).join('');

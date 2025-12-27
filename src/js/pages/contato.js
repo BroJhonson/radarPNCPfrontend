@@ -1,6 +1,6 @@
 // frontend/src/js/pages/contato.js
 
-import { API_BASE_URL } from '../config.js';
+import api from '../services/api.js';
 
 // Função auxiliar para criar alertas do Bootstrap
 function createAlert(message, type) {
@@ -42,23 +42,10 @@ export default function initContatoPage() {
 
         try {
             // Envia os dados para a nossa API do backend
-            const response = await fetch(`${API_BASE_URL}/api/contato`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            });
-
-            const result = await response.json();
-
-            if (!response.ok) {
-                // Se a API retornar um erro (ex: 400, 500), lança uma exceção
-                throw new Error(result.mensagem || 'Ocorreu um erro.');
-            }
+            const result = await api.enviarContato(data);
 
             // Sucesso! Mostra uma mensagem positiva e reseta o formulário
-            alertPlaceholder.append(createAlert(result.mensagem, 'success'));
+            alertPlaceholder.append(createAlert(result.mensagem || 'Mensagem enviada com sucesso!', 'success'));
             form.reset();
 
         } catch (error) {

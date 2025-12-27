@@ -15,7 +15,6 @@
     };
   }
   function setupGlobalFeatures() {
-    console.log("Configurando funcionalidades globais...");
     const templateFeedback = document.getElementById("template-painel-feedback");
     const placeholderDesktop = document.getElementById("feedback-placeholder-desktop");
     const placeholderMobile = document.getElementById("feedback-placeholder-mobile");
@@ -105,7 +104,6 @@
           this.classList.add("active");
         }
       };
-      console.log("L\xF3gica da Home Page (acorde\xE3o) iniciada.");
       const accordionCards = document.querySelectorAll(".accordion-card");
       const isMobile = () => window.innerWidth <= 767;
       const setupAccordionListeners = () => {
@@ -131,7 +129,6 @@
     try {
       return favoritosJson ? JSON.parse(favoritosJson) : [];
     } catch (e) {
-      console.error("Erro ao parsear favoritos do localStorage:", e);
       localStorage.removeItem(FAVORITOS_KEY);
       return [];
     }
@@ -142,7 +139,6 @@
     if (!favoritos.includes(pncpId)) {
       favoritos.push(pncpId);
       localStorage.setItem(FAVORITOS_KEY, JSON.stringify(favoritos));
-      console.log("Adicionado aos favoritos:", pncpId);
       return true;
     }
     return false;
@@ -154,7 +150,6 @@
     if (index > -1) {
       favoritos.splice(index, 1);
       localStorage.setItem(FAVORITOS_KEY, JSON.stringify(favoritos));
-      console.log("Removido dos favoritos:", pncpId);
       return true;
     }
     return false;
@@ -165,15 +160,229 @@
   }
 
   // src/js/config.js
-  var isProduction = false;
-  var API_BASE_URL_PROD = "https://api.seusite.com";
-  var API_BASE_URL_DEV = "http://localhost:5000";
-  var API_BASE_URL = isProduction ? API_BASE_URL_PROD : API_BASE_URL_DEV;
-  console.log(`[Config] Ambiente: ${isProduction ? "Produ\xE7\xE3o" : "Desenvolvimento"}. API URL: ${API_BASE_URL}`);
+  var API_BASE_URL = "https://api.finnd.com.br";
+
+  // src/js/services/api.js
+  var ApiService = class {
+    constructor(baseUrl) {
+      this.baseUrl = baseUrl;
+    }
+    /**
+     * Método genérico para fazer requisições HTTP
+     * @param {string} endpoint - Endpoint da API (sem /api/)
+     * @param {Object} options - Opções do fetch (method, body, headers, etc)
+     * @returns {Promise<Response>}
+     */
+    async request(endpoint, options = {}) {
+      const baseUrl = this.baseUrl.replace(/\/$/, "");
+      const endpointPath = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+      const url = `${baseUrl}${endpointPath}`;
+      const defaultHeaders = {
+        "Content-Type": "application/json"
+      };
+      const token = this.getAuthToken();
+      if (token) {
+        defaultHeaders["Authorization"] = `Bearer ${token}`;
+      }
+      const config = {
+        ...options,
+        headers: {
+          ...defaultHeaders,
+          ...options.headers || {}
+        }
+      };
+      try {
+        const response = await fetch(url, config);
+        let data;
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          data = await response.json();
+        } else {
+          data = await response.text();
+        }
+        if (!response.ok) {
+          const error = new Error(data.erro || data.mensagem || `Erro ${response.status}`);
+          error.status = response.status;
+          error.data = data;
+          throw error;
+        }
+        return data;
+      } catch (error) {
+        if (error.status) {
+          throw error;
+        }
+        throw new Error(`Erro de conex\xE3o: ${error.message}`);
+      }
+    }
+    /**
+     * GET request
+     */
+    async get(endpoint, params = {}) {
+      const queryString = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== null && value !== void 0 && value !== "") {
+          if (Array.isArray(value)) {
+            if (value.length > 0) {
+              queryString.append(key, value.join(","));
+            }
+          } else {
+            queryString.append(key, value);
+          }
+        }
+      });
+      const url = queryString.toString() ? `${endpoint}?${queryString.toString()}` : endpoint;
+      return this.request(url, {
+        method: "GET"
+      });
+    }
+    /**
+     * POST request
+     */
+    async post(endpoint, data = {}) {
+      return this.request(endpoint, {
+        method: "POST",
+        body: JSON.stringify(data)
+      });
+    }
+    /**
+     * PUT request
+     */
+    async put(endpoint, data = {}) {
+      return this.request(endpoint, {
+        method: "PUT",
+        body: JSON.stringify(data)
+      });
+    }
+    /**
+     * DELETE request
+     */
+    async delete(endpoint) {
+      return this.request(endpoint, { method: "DELETE" });
+    }
+    /**
+     * Obtém token de autenticação (para futuras implementações)
+     */
+    getAuthToken() {
+      return null;
+    }
+    // ============================================
+    // MÉTODOS ESPECÍFICOS DA API
+    // ============================================
+    /**
+     * Busca licitações com filtros
+     * @param {Object} filters - Objeto com filtros de busca
+     * @returns {Promise<Object>} Resposta da API com licitações e paginação
+     */
+    async buscarLicitacoes(filters = {}) {
+      return this.get("/api/licitacoes", filters);
+    }
+    /**
+     * Busca detalhes de uma licitação específica
+     * @param {string} numeroControlePNCP - Número de controle PNCP
+     * @returns {Promise<Object>} Dados completos da licitação com itens e arquivos
+     */
+    async buscarDetalhesLicitacao(numeroControlePNCP) {
+      return this.get(`/api/licitacao/${encodeURIComponent(numeroControlePNCP)}`);
+    }
+    /**
+     * Busca modalidades de referência
+     * @returns {Promise<Array>} Lista de modalidades
+     */
+    async buscarModalidades() {
+      return this.get("/api/referencias/modalidades");
+    }
+    /**
+     * Busca status de compra de referência
+     * @returns {Promise<Array>} Lista de status
+     */
+    async buscarStatusCompra() {
+      return this.get("/api/referencias/statuscompra");
+    }
+    /**
+     * Busca status radar de referência
+     * @returns {Promise<Array>} Lista de status radar
+     */
+    async buscarStatusRadar() {
+      return this.get("/api/referencias/statusradar");
+    }
+    /**
+     * Busca municípios do IBGE por UF
+     * @param {string} ufSigla - Sigla da UF (ex: 'SP', 'RJ')
+     * @returns {Promise<Array>} Lista de municípios
+     */
+    async buscarMunicipiosIBGE(ufSigla) {
+      return this.get(`/api/ibge/municipios/${ufSigla}`);
+    }
+    /**
+     * Exporta licitações em CSV
+     * @param {Object} filters - Filtros de busca (mesmos da busca)
+     * @returns {void} Abre download do CSV
+     */
+    exportarCSV(filters = {}) {
+      const queryString = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value !== null && value !== void 0 && value !== "") {
+          if (Array.isArray(value)) {
+            value.forEach((v) => queryString.append(key, v));
+          } else {
+            queryString.append(key, value);
+          }
+        }
+      });
+      const url = `${this.baseUrl}/api/exportar-csv?${queryString.toString()}`;
+      window.open(url, "_blank");
+    }
+    /**
+     * Envia formulário de contato
+     * @param {Object} dados - Dados do formulário
+     * @returns {Promise<Object>} Resposta da API
+     */
+    async enviarContato(dados) {
+      return this.post("/api/contato", dados);
+    }
+    /**
+     * Busca posts do blog
+     * @param {Object} params - Parâmetros de busca (categoria, tag, q, page)
+     * @returns {Promise<Object>} Posts e informações de paginação
+     */
+    async buscarPosts(params = {}) {
+      return this.get("/api/posts", params);
+    }
+    /**
+     * Busca um post específico por slug
+     * @param {string} slug - Slug do post
+     * @returns {Promise<Object>} Dados do post
+     */
+    async buscarPost(slug) {
+      return this.get(`/api/post/${slug}`);
+    }
+    /**
+     * Busca posts em destaque
+     * @returns {Promise<Object>} Lista de posts em destaque
+     */
+    async buscarPostsDestaque() {
+      return this.get("/api/posts/destaques");
+    }
+    /**
+     * Busca categorias do blog
+     * @returns {Promise<Object>} Lista de categorias
+     */
+    async buscarCategorias() {
+      return this.get("/api/categorias");
+    }
+    /**
+     * Busca tags do blog
+     * @returns {Promise<Object>} Lista de tags
+     */
+    async buscarTags() {
+      return this.get("/api/tags");
+    }
+  };
+  var api = new ApiService(API_BASE_URL);
+  var api_default = api;
 
   // src/js/pages/radar.js
   function initRadarPage() {
-    console.log("P\xE1gina Radar: Inicializando funcionalidades...");
     const filtrosAtivosContainer = document.getElementById("filtrosAtivosContainer");
     const filtrosAtivosTexto = document.getElementById("filtrosAtivosTexto");
     const linkLimparFiltrosRapido = document.getElementById("linkLimparFiltrosRapido");
@@ -262,7 +471,6 @@
           });
         }
       } catch (e) {
-        console.error("Erro ao formatar data e hora:", dateTimeString, e);
         return "Formato Inv\xE1lido";
       }
     };
@@ -275,38 +483,49 @@
     const btnExportarCsv = document.getElementById("btnExportarCsv");
     if (btnExportarCsv) {
       btnExportarCsv.addEventListener("click", function() {
-        const params = new URLSearchParams();
+        const ufsSelecionadas = Array.from(document.querySelectorAll(".filter-uf:checked")).map((cb) => cb.value);
+        const modalidadesSelecionadas = Array.from(document.querySelectorAll(".filter-modalidade:checked")).map((cb) => parseInt(cb.value));
+        const municipiosSelecionados = Array.from(document.querySelectorAll("#municipiosContainerDropdown .filter-municipio:checked")).map((cb) => cb.value);
+        const statusSelecionado = document.querySelector(".filter-status:checked");
+        const [orderByField, orderDirValue] = ordenarPorSelect.value.split("_");
+        const filters = {
+          orderBy: orderByField,
+          orderDir: orderDirValue.toUpperCase()
+        };
         if (palavrasChaveInclusao.length > 0) {
-          palavrasChaveInclusao.forEach((p) => params.append("palavraChave", p));
+          filters.palavraChave = palavrasChaveInclusao;
         }
         if (palavrasChaveExclusao.length > 0) {
-          palavrasChaveExclusao.forEach((p) => params.append("excluirPalavra", p));
+          filters.excluirPalavra = palavrasChaveExclusao;
         }
-        document.querySelectorAll(".filter-uf:checked").forEach((cb) => params.append("uf", cb.value));
-        document.querySelectorAll(".filter-modalidade:checked").forEach((cb) => params.append("modalidadeId", cb.value));
-        const statusSelecionado = document.querySelector(".filter-status:checked");
-        if (statusSelecionado) {
-          params.append("statusRadar", statusSelecionado.value);
+        if (ufsSelecionadas.length > 0) {
+          filters.uf = ufsSelecionadas;
         }
-        document.querySelectorAll("#municipiosContainerDropdown .filter-municipio:checked").forEach((cb) => params.append("municipioNome", cb.value));
-        if (dataPubInicioInput.value) params.append("dataPubInicio", dataPubInicioInput.value);
-        if (dataPubFimInput.value) params.append("dataPubFim", dataPubFimInput.value);
-        if (dataAtualizacaoInicioInput.value) params.append("dataAtualizacaoInicio", dataAtualizacaoInicioInput.value);
-        if (dataAtualizacaoFimInput.value) params.append("dataAtualizacaoFim", dataAtualizacaoFimInput.value);
-        if (valorMinInput.value) params.append("valorMin", valorMinInput.value);
-        if (valorMaxInput.value) params.append("valorMax", valorMaxInput.value);
-        const [orderByField, orderDirValue] = ordenarPorSelect.value.split("_");
-        params.append("orderBy", orderByField);
-        params.append("orderDir", orderDirValue.toUpperCase());
-        console.log("Exportando com os seguintes par\xE2metros:", params.toString());
-        const url = `/api/exportar-csv?${params.toString()}`;
-        window.open(url, "_blank");
+        if (modalidadesSelecionadas.length > 0) {
+          filters.modalidadeId = modalidadesSelecionadas;
+        }
+        if (municipiosSelecionados.length > 0) {
+          filters.municipioNome = municipiosSelecionados;
+        }
+        if (statusSelecionado && statusSelecionado.value) {
+          filters.statusRadar = statusSelecionado.value;
+        }
+        if (dataPubInicioInput.value) filters.dataPubInicio = dataPubInicioInput.value;
+        if (dataPubFimInput.value) filters.dataPubFim = dataPubFimInput.value;
+        if (dataAtualizacaoInicioInput && dataAtualizacaoInicioInput.value) {
+          filters.dataAtualizacaoInicio = dataAtualizacaoInicioInput.value;
+        }
+        if (dataAtualizacaoFimInput && dataAtualizacaoFimInput.value) {
+          filters.dataAtualizacaoFim = dataAtualizacaoFimInput.value;
+        }
+        if (valorMinInput.value) filters.valorMin = parseFloat(valorMinInput.value);
+        if (valorMaxInput.value) filters.valorMax = parseFloat(valorMaxInput.value);
+        api_default.exportarCSV(filters);
       });
     }
     if (offcanvasFiltrosBody) {
       offcanvasFiltrosBody.addEventListener("keydown", function(event) {
         if ((event.key === "Enter" || event.key === "NumpadEnter") && (event.ctrlKey || event.metaKey)) {
-          console.log("Ctrl+Enter pressionado, aplicando filtros...");
           event.preventDefault();
           buscarLicitacoes(1);
           const offcanvasFiltrosElement = document.getElementById("offcanvasFiltros");
@@ -321,7 +540,6 @@
       offcanvasFiltrosBody.addEventListener("click", function(event) {
         if (event.target.classList.contains("btn-limpar-grupo")) {
           const tipoLimpeza = event.target.dataset.limpar;
-          console.log(`[DEBUG] \u{1F5B1}\uFE0F Clique no 'X' do GRUPO '${tipoLimpeza}'`);
           let estadoAlterado = false;
           switch (tipoLimpeza) {
             case "status":
@@ -366,7 +584,6 @@
       });
     }
     function renderTags(palavrasArray, containerElement, tipo) {
-      console.log(`[DEBUG] \u{1F3A8} RENDERIZANDO TAGS para '${tipo}'. Dados:`, JSON.stringify(palavrasArray));
       if (!containerElement) return;
       containerElement.innerHTML = "";
       palavrasArray.forEach((palavra, index) => {
@@ -393,7 +610,6 @@
       });
     }
     function addPalavraChave(inputField, palavrasArray, containerElement, tipo) {
-      console.log(`[DEBUG] \u{1F4E5} Adicionando palavra-chave para '${tipo}'...`);
       if (!inputField) return;
       const termos = inputField.value.trim();
       if (termos) {
@@ -549,7 +765,6 @@
       });
     }
     function salvarFiltrosAtuais() {
-      console.log("[DEBUG] \u{1F4BE} SALVANDO FILTROS no localStorage...");
       const filtros = {
         palavrasChaveInclusao,
         palavrasChaveExclusao,
@@ -567,22 +782,14 @@
         itensPorPagina: itensPorPaginaSelect.value
       };
       localStorage.setItem(FILTROS_KEY, JSON.stringify(filtros));
-      console.log("[DEBUG] \u2705 Filtros salvos. Estado atual:", {
-        inclusao: palavrasChaveInclusao,
-        exclusao: palavrasChaveExclusao
-      });
-      console.log("[DEBUG] localStorage agora cont\xE9m:", localStorage.getItem(FILTROS_KEY));
     }
     function carregarFiltrosSalvos() {
-      console.log("[DEBUG] \u{1F504} CARREGANDO FILTROS do localStorage...");
       const filtrosSalvosJson = localStorage.getItem(FILTROS_KEY);
       if (!filtrosSalvosJson) {
-        console.log("Nenhum filtro salvo encontrado.");
         return;
       }
       try {
         const filtros = JSON.parse(filtrosSalvosJson);
-        console.log("Carregando filtros salvos:", filtros);
         if (filtros.palavrasChaveInclusao) {
           palavrasChaveInclusao = filtros.palavrasChaveInclusao;
           renderTags(palavrasChaveInclusao, tagsPalavraInclusaoContainer, "inclusao");
@@ -626,7 +833,6 @@
         if (filtros.ordenacao) ordenarPorSelect.value = filtros.ordenacao;
         if (filtros.itensPorPagina) itensPorPaginaSelect.value = filtros.itensPorPagina;
       } catch (e) {
-        console.error("[DEBUG] \u274C Erro ao carregar/parsear filtros:", e);
         localStorage.removeItem(FILTROS_KEY);
       }
     }
@@ -767,16 +973,12 @@
         let licData = cacheLicitacoesSidebar[pncpId];
         if (!licData) {
           try {
-            const response = await fetch(`${API_BASE_URL}/api/licitacao/${encodeURIComponent(pncpId)}`);
-            if (response.ok) {
-              const fullData = await response.json();
-              if (fullData.licitacao) {
-                licData = fullData.licitacao;
-                cacheLicitacoesSidebar[pncpId] = licData;
-              }
+            const fullData = await api_default.buscarDetalhesLicitacao(pncpId);
+            if (fullData && fullData.licitacao) {
+              licData = fullData.licitacao;
+              cacheLicitacoesSidebar[pncpId] = licData;
             }
           } catch (error) {
-            console.error("Erro ao buscar favorito para sidebar:", error);
           }
         }
         if (licData) {
@@ -809,9 +1011,7 @@
       if (!modalidadesContainer) return;
       modalidadesContainer.innerHTML = '<small class="text-muted">Carregando modalidades...</small>';
       try {
-        const response = await fetch(`${API_BASE_URL}/api/referencias/modalidades`);
-        if (!response.ok) throw new Error(`Erro na API: ${response.status}`);
-        const modalidadesApi = await response.json();
+        const modalidadesApi = await api_default.buscarModalidades();
         modalidadesContainer.innerHTML = "";
         if (modalidadesApi && modalidadesApi.length > 0) {
           modalidadesApi.sort((a, b) => a.modalidadeNome.localeCompare(b.modalidadeNome));
@@ -829,7 +1029,6 @@
           modalidadesContainer.innerHTML = '<small class="text-danger">Nenhuma modalidade encontrada.</small>';
         }
       } catch (error) {
-        console.error("Erro ao carregar modalidades:", error);
         modalidadesContainer.innerHTML = `<small class="text-danger">Erro ao carregar modalidades: ${error.message}</small>`;
       }
       updateModalidadeSelectedCount();
@@ -838,9 +1037,7 @@
       if (!statusContainer) return;
       statusContainer.innerHTML = '<small class="text-muted">Carregando status...</small>';
       try {
-        const response = await fetch(`${API_BASE_URL}/api/referencias/statusradar`);
-        if (!response.ok) throw new Error(`Erro na API: ${response.status}`);
-        const statusRadarApi = await response.json();
+        const statusRadarApi = await api_default.buscarStatusRadar();
         statusContainer.innerHTML = "";
         if (statusRadarApi && statusRadarApi.length > 0) {
           const defaultStatusValue = "A Receber/Recebendo Proposta";
@@ -872,7 +1069,6 @@
           statusContainer.innerHTML = '<small class="text-danger">Nenhum status encontrado.</small>';
         }
       } catch (error) {
-        console.error("Erro ao carregar status radar:", error);
         statusContainer.innerHTML = `<small class="text-danger">Erro ao carregar status: ${error.message}</small>`;
       }
     }
@@ -916,23 +1112,18 @@
       let ufsComErro = [];
       for (const uf of ufsSelecionadas) {
         try {
-          const response = await fetch(`${API_BASE_URL}/api/ibge/municipios/${uf}`);
-          const data = await response.json();
-          console.log(`Resposta da API para UF ${uf}:`, data);
-          if (!response.ok) {
-            ufsComErro.push(uf);
-            continue;
-          }
-          data.forEach((mun) => {
-            todosMunicipios.push({
-              id: `${uf}-${mun.id}`,
-              nome: `${mun.nome} (${uf})`,
-              nomeOriginal: mun.nome,
-              uf
+          const data = await api_default.buscarMunicipiosIBGE(uf);
+          if (data && Array.isArray(data)) {
+            data.forEach((mun) => {
+              todosMunicipios.push({
+                id: `${uf}-${mun.id}`,
+                nome: `${mun.nome} (${uf})`,
+                nomeOriginal: mun.nome,
+                uf
+              });
             });
-          });
+          }
         } catch (error) {
-          console.error(`Erro cr\xEDtico ao carregar munic\xEDpios para ${uf}:`, error);
           ufsComErro.push(uf);
         }
       }
@@ -968,7 +1159,6 @@
       }
     }
     async function buscarLicitacoes(page = 1) {
-      console.log(`[DEBUG] \u{1F4E1} BUSCANDO LICITA\xC7\xD5ES... P\xE1gina: ${page}`);
       salvarFiltrosAtuais();
       const btnAplicar = document.getElementById("btnBuscarLicitacoes");
       if (btnAplicar) {
@@ -976,24 +1166,13 @@
         btnAplicar.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Buscando...`;
       }
       currentPage = page;
-      const params = new URLSearchParams();
       if (loadingOverlay) loadingOverlay.classList.remove("d-none");
-      if (palavrasChaveInclusao.length > 0) {
-        palavrasChaveInclusao.forEach((p) => params.append("palavraChave", p));
-      }
-      if (palavrasChaveExclusao.length > 0) {
-        palavrasChaveExclusao.forEach((p) => params.append("excluirPalavra", p));
-      }
-      document.querySelectorAll(".filter-uf:checked").forEach((cb) => params.append("uf", cb.value));
-      document.querySelectorAll(".filter-modalidade:checked").forEach((cb) => params.append("modalidadeId", cb.value));
+      const ufsSelecionadas = Array.from(document.querySelectorAll(".filter-uf:checked")).map((cb) => cb.value);
+      const modalidadesSelecionadas = Array.from(document.querySelectorAll(".filter-modalidade:checked")).map((cb) => parseInt(cb.value));
+      const municipiosSelecionados = Array.from(document.querySelectorAll("#municipiosContainerDropdown .filter-municipio:checked")).map((cb) => cb.value);
       const statusSelecionadoRadio = document.querySelector(".filter-status:checked");
-      let statusRadarValor = "";
-      if (statusSelecionadoRadio) {
-        statusRadarValor = statusSelecionadoRadio.value;
-      }
-      if (statusRadarValor) {
-        params.append("statusRadar", statusRadarValor);
-      }
+      const statusRadarValor = statusSelecionadoRadio ? statusSelecionadoRadio.value : "";
+      const [orderByField, orderDirValue] = ordenarPorSelect.value.split("_");
       if (statusWarning) statusWarning.classList.add("d-none");
       if ((statusRadarValor === "" || statusRadarValor === "Encerrada") && palavrasChaveInclusao.length === 0) {
         if (statusWarning) {
@@ -1011,57 +1190,57 @@
         }
         return;
       }
-      const municipiosSelecionados = Array.from(document.querySelectorAll("#municipiosContainerDropdown .filter-municipio:checked")).map((cb) => cb.value);
+      const filters = {
+        pagina: currentPage,
+        porPagina: parseInt(itensPorPaginaSelect.value, 10),
+        orderBy: orderByField,
+        orderDir: orderDirValue.toUpperCase()
+      };
+      if (palavrasChaveInclusao.length > 0) {
+        filters.palavraChave = palavrasChaveInclusao;
+      }
+      if (palavrasChaveExclusao.length > 0) {
+        filters.excluirPalavra = palavrasChaveExclusao;
+      }
+      if (ufsSelecionadas.length > 0) {
+        filters.uf = ufsSelecionadas;
+      }
+      if (modalidadesSelecionadas.length > 0) {
+        filters.modalidadeId = modalidadesSelecionadas;
+      }
       if (municipiosSelecionados.length > 0) {
-        municipiosSelecionados.forEach((mun) => params.append("municipioNome", mun));
+        filters.municipioNome = municipiosSelecionados;
       }
-      const dataInicio = dataPubInicioInput.value;
-      if (dataInicio) params.append("dataPubInicio", dataInicio);
-      const dataFim = dataPubFimInput.value;
-      if (dataFim) params.append("dataPubFim", dataFim);
-      if (dataAtualizacaoInicioInput && dataAtualizacaoFimInput) {
-        const dataAtualInicio = dataAtualizacaoInicioInput.value;
-        if (dataAtualInicio) params.append("dataAtualizacaoInicio", dataAtualInicio);
-        const dataAtualFim = dataAtualizacaoFimInput.value;
-        if (dataAtualFim) params.append("dataAtualizacaoFim", dataAtualFim);
+      if (statusRadarValor) {
+        filters.statusRadar = statusRadarValor;
       }
-      const valMin = valorMinInput.value;
-      if (valMin) params.append("valorMin", valMin);
-      const valMax = valorMaxInput.value;
-      if (valMax) params.append("valorMax", valMax);
-      params.append("pagina", currentPage);
-      params.append("porPagina", itensPorPaginaSelect.value);
-      const [orderByField, orderDirValue] = ordenarPorSelect.value.split("_");
-      params.append("orderBy", orderByField);
-      params.append("orderDir", orderDirValue.toUpperCase());
+      if (dataPubInicioInput.value) {
+        filters.dataPubInicio = dataPubInicioInput.value;
+      }
+      if (dataPubFimInput.value) {
+        filters.dataPubFim = dataPubFimInput.value;
+      }
+      if (dataAtualizacaoInicioInput && dataAtualizacaoInicioInput.value) {
+        filters.dataAtualizacaoInicio = dataAtualizacaoInicioInput.value;
+      }
+      if (dataAtualizacaoFimInput && dataAtualizacaoFimInput.value) {
+        filters.dataAtualizacaoFim = dataAtualizacaoFimInput.value;
+      }
+      if (valorMinInput.value) {
+        filters.valorMin = parseFloat(valorMinInput.value);
+      }
+      if (valorMaxInput.value) {
+        filters.valorMax = parseFloat(valorMaxInput.value);
+      }
       licitacoesTableBody.innerHTML = `<tr><td colspan="8" class="text-center">Buscando licita\xE7\xF5es... <div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>`;
       totalRegistrosInfo.textContent = "-";
       exibicaoInfo.textContent = "";
       try {
-        console.log("[DEBUG] \u2699\uFE0F Par\xE2metros da API:", params.toString());
-        const apiUrl = `${API_BASE_URL}/api/licitacoes?${params.toString()}`;
-        console.log("[DEBUG] Chamando API em:", apiUrl);
-        const response = await fetch(apiUrl);
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}));
-          console.error("Erro da API:", response.status, errorData);
-          let errorMessage = `Erro ${response.status}`;
-          if (response.status === 400 && errorData.erro) {
-            errorMessage = `Erro de valida\xE7\xE3o: ${errorData.erro}${errorData.detalhes ? " (" + errorData.detalhes + ")" : ""}`;
-          } else if (response.status === 404) {
-            errorMessage = "Recurso n\xE3o encontrado no servidor (404).";
-          } else if (errorData.erro_backend) {
-            errorMessage = `Erro no servidor: ${errorData.erro_backend}`;
-          } else if (errorData.erro_frontend) {
-            errorMessage = `Erro no servidor do frontend: ${errorData.erro_frontend}`;
-          } else if (response.statusText) {
-            errorMessage = `Erro ${response.status}: ${response.statusText}`;
-          }
-          throw new Error(`Erro na API: ${response.status}`);
+        const data = await api_default.buscarLicitacoes(filters);
+        if (!data || typeof data !== "object") {
+          throw new Error("Resposta inv\xE1lida da API");
         }
-        const data = await response.json();
-        console.log("[DEBUG] \u2705 Dados recebidos da API:", data);
-        renderLicitacoesTable(data.licitacoes);
+        renderLicitacoesTable(data.licitacoes || []);
         renderPagination2(data);
         atualizarExibicaoFiltrosAtivos();
         totalRegistrosInfo.textContent = data.total_registros || "0";
@@ -1076,8 +1255,8 @@
           }
         }
       } catch (error) {
-        console.error("[DEBUG] \u{1F4A5} Erro cr\xEDtico ao buscar licita\xE7\xF5es:", error);
-        licitacoesTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Erro ao buscar licita\xE7\xF5es: ${error.message}</td></tr>`;
+        const errorMessage = error.message || "Erro desconhecido ao buscar licita\xE7\xF5es";
+        licitacoesTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Erro ao buscar licita\xE7\xF5es: ${errorMessage}</td></tr>`;
         totalRegistrosInfo.textContent = "0";
         exibicaoInfo.textContent = "Erro";
         paginationControls.innerHTML = "";
@@ -1087,7 +1266,6 @@
           btnAplicar.disabled = false;
           btnAplicar.innerHTML = `<i class="bi bi-search"></i> Aplicar Filtros`;
         }
-        console.log("[DEBUG] \u{1F3C1} Fim da busca.");
       }
     }
     function renderLicitacoesTable(licitacoes) {
@@ -1098,8 +1276,6 @@
         return;
       }
       if (licitacoes.length > 0) {
-        console.log("[DEBUG] Formato do objeto da primeira licita\xE7\xE3o:", licitacoes[0]);
-        console.log("[DEBUG] Tipo de 'dataAtualizacao':", typeof licitacoes[0].dataAtualizacao);
       }
       licitacoes.forEach((lic) => {
         const tr = document.createElement("tr");
@@ -1278,10 +1454,8 @@
       });
     }
     function limparFiltros() {
-      console.log("[DEBUG] \u{1F5D1}\uFE0F INICIANDO LIMPEZA TOTAL DE FILTROS...");
       if (palavraChaveInclusaoInputField) palavraChaveInclusaoInputField.value = "";
       if (palavraChaveExclusaoInputField) palavraChaveExclusaoInputField.value = "";
-      console.log("[DEBUG] Limpando arrays de palavras-chave em mem\xF3ria...");
       palavrasChaveInclusao = [];
       palavrasChaveExclusao = [];
       renderTags(palavrasChaveInclusao, tagsPalavraInclusaoContainer, "inclusao");
@@ -1317,9 +1491,7 @@
       if (advancedCollapse && advancedCollapse.classList.contains("show")) {
         new bootstrap.Collapse(advancedCollapse).hide();
       }
-      console.log("[DEBUG] Chamando salvarFiltrosAtuais() ap\xF3s zerar os arrays...");
       salvarFiltrosAtuais();
-      console.log("[DEBUG] Limpeza conclu\xEDda. Acionando nova busca...");
       atualizarExibicaoFiltrosAtivos();
       buscarLicitacoes(1);
     }
@@ -1336,19 +1508,11 @@
       document.getElementById("detailsPanelArquivosList").innerHTML = "";
       detailsPanel.show();
       try {
-        const response = await fetch(`${API_BASE_URL}/api/licitacao/${encodeURIComponent(pncpId)}`);
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({
-            erro_frontend: "Erro desconhecido na resposta da API de detalhes."
-          }));
-          throw new Error(errorData.erro_backend || errorData.erro_frontend || `Erro ${response.status}`);
-        }
-        const data = await response.json();
-        console.log("[DEBUG] Dados de DETALHES recebidos para PNCP ID:", pncpId, JSON.parse(JSON.stringify(data)));
+        const data = await api_default.buscarDetalhesLicitacao(pncpId);
         renderDetailsPanelContent(data);
       } catch (error) {
-        console.error("Erro ao buscar detalhes da licita\xE7\xE3o:", error);
-        detailsPanelContent.innerHTML = `<p class="text-center text-danger">Erro ao carregar detalhes: ${error.message}</p>`;
+        const errorMessage = error.message || "Erro desconhecido ao carregar detalhes";
+        detailsPanelContent.innerHTML = `<p class="text-center text-danger">Erro ao carregar detalhes: ${errorMessage}</p>`;
       }
     }
     if (licitacoesTableBody) {
@@ -1625,7 +1789,6 @@
       });
     }
     async function inicializarPagina() {
-      console.log("[DEBUG] \u{1F3C1} INICIALIZANDO A P\xC1GINA...");
       popularUFs();
       await popularModalidades();
       await popularStatus();
@@ -1653,12 +1816,10 @@
       if (btnAtualizarTabela) {
         btnAtualizarTabela.disabled = false;
         btnAtualizarTabela.addEventListener("click", () => {
-          console.log("Bot\xE3o Atualizar Tabela clicado - Refazendo busca para p\xE1gina:", currentPage);
           if (currentPage < 1) currentPage = 1;
           buscarLicitacoes(currentPage);
         });
       }
-      console.log("[DEBUG] \u2705 P\xE1gina inicializada e listeners configurados.");
     }
     inicializarPagina();
   }
@@ -1711,27 +1872,23 @@
     const categoryList = document.getElementById("category-list");
     const tagCloud = document.getElementById("tag-cloud");
     try {
-      const response = await fetch(`${API_BASE_URL}/api/categorias`);
-      const data = await response.json();
+      const data = await api_default.buscarCategorias();
       if (data.categorias) {
         categoryList.innerHTML = data.categorias.map(
           (cat) => `<li><a href="/blog.html?categoria=${cat.slug}">${cat.nome}</a></li>`
         ).join("");
       }
     } catch (error) {
-      console.error("Erro ao carregar categorias:", error);
       categoryList.innerHTML = "<li>Falha ao carregar.</li>";
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/api/tags`);
-      const data = await response.json();
+      const data = await api_default.buscarTags();
       if (data.tags) {
         tagCloud.innerHTML = data.tags.map(
           (tag) => `<a href="/blog.html?tag=${tag.nome}" class="tag-item">${tag.nome}</a>`
         ).join(" ");
       }
     } catch (error) {
-      console.error("Erro ao carregar tags:", error);
       tagCloud.innerHTML = '<span class="text-danger">Falha ao carregar.</span>';
     }
   }
@@ -1778,23 +1935,18 @@
     loadingIndicator.style.display = "block";
     postsContainer.innerHTML = "";
     try {
-      const params = new URLSearchParams(window.location.search);
-      const categoriaSlug = params.get("categoria");
-      const tagNome = params.get("tag");
-      const searchTerm = params.get("q");
-      const page = params.get("page") || "1";
-      let apiUrl = `${API_BASE_URL}/api/posts`;
-      const queryParams = [];
-      if (categoriaSlug) queryParams.push(`categoria=${categoriaSlug}`);
-      if (tagNome) queryParams.push(`tag=${encodeURIComponent(tagNome)}`);
-      if (searchTerm) queryParams.push(`q=${encodeURIComponent(searchTerm)}`);
-      if (queryParams.length > 0) {
-        apiUrl += `?${queryParams.join("&")}`;
-      }
-      queryParams.push(`page=${page}`);
-      const response = await fetch(apiUrl);
-      if (!response.ok) throw new Error(`Erro na API: ${response.statusText}`);
-      const data = await response.json();
+      const urlParams = new URLSearchParams(window.location.search);
+      const categoriaSlug = urlParams.get("categoria");
+      const tagNome = urlParams.get("tag");
+      const searchTerm = urlParams.get("q");
+      const page = urlParams.get("page") || "1";
+      const params = {
+        page: parseInt(page, 10) || 1
+      };
+      if (categoriaSlug) params.categoria = categoriaSlug;
+      if (tagNome) params.tag = tagNome;
+      if (searchTerm) params.q = searchTerm;
+      const data = await api_default.buscarPosts(params);
       if (data.posts && data.posts.length > 0) {
         const postsHtml = data.posts.map(createPostCard).join("");
         postsContainer.innerHTML = postsHtml;
@@ -1805,7 +1957,6 @@
         document.getElementById("pagination-container").innerHTML = "";
       }
     } catch (error) {
-      console.error("Erro ao buscar posts:", error);
       postsContainer.innerHTML = '<p class="text-center text-danger">Falha ao carregar os posts.</p>';
     } finally {
       loadingIndicator.style.display = "none";
@@ -1848,17 +1999,13 @@
     loadingIndicator.style.display = "block";
     postsContainer.innerHTML = "";
     try {
-      const params = new URLSearchParams(window.location.search);
-      const categoriaSlug = params.get("categoria");
-      const tagNome = params.get("tag");
-      let apiUrl = `${API_BASE_URL}/api/posts`;
-      const queryParams = [];
-      if (categoriaSlug) queryParams.push(`categoria=${categoriaSlug}`);
-      if (tagNome) queryParams.push(`tag=${encodeURIComponent(tagNome)}`);
-      if (queryParams.length > 0) apiUrl += `?${queryParams.join("&")}`;
-      const response = await fetch(apiUrl);
-      if (!response.ok) throw new Error(`Erro na API: ${response.statusText}`);
-      const data = await response.json();
+      const urlParams = new URLSearchParams(window.location.search);
+      const categoriaSlug = urlParams.get("categoria");
+      const tagNome = urlParams.get("tag");
+      const params = {};
+      if (categoriaSlug) params.categoria = categoriaSlug;
+      if (tagNome) params.tag = tagNome;
+      const data = await api_default.buscarPosts(params);
       if (data.posts && data.posts.length > 0) {
         const postsHtml = data.posts.map(createPostCard).join("");
         postsContainer.innerHTML = postsHtml;
@@ -1866,7 +2013,6 @@
         postsContainer.innerHTML = '<p class="text-center">Nenhum post encontrado.</p>';
       }
     } catch (error) {
-      console.error("Erro ao buscar posts:", error);
       postsContainer.innerHTML = '<p class="text-center text-danger">Falha ao carregar os posts.</p>';
     } finally {
       loadingIndicator.style.display = "none";
@@ -1887,12 +2033,11 @@
       return;
     }
     try {
-      const response = await fetch(`${API_BASE_URL}/api/post/${postSlug}`);
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.erro || "Erro ao buscar o post.");
-      }
+      const data = await api_default.buscarPost(postSlug);
       const post = data.post;
+      if (!post) {
+        throw new Error("Post n\xE3o encontrado.");
+      }
       document.title = `${decodeHtml(post.titulo)} - Blog RADAR PNCP`;
       titleElement.innerHTML = decodeHtml(post.titulo);
       contentElement.innerHTML = decodeHtml(post.conteudo_completo);
@@ -1926,7 +2071,6 @@
       const crumb = document.getElementById("breadcrumb-post-title");
       if (crumb) crumb.textContent = decodeHtml(post.titulo);
     } catch (error) {
-      console.error("Erro ao carregar post:", error);
       document.title = "Erro - RADAR PNCP";
       titleElement.textContent = "Ocorreu um Erro";
       contentElement.innerHTML = `<p class="text-center text-danger">N\xE3o foi poss\xEDvel carregar o conte\xFAdo do post. Causa: ${error.message}</p>`;
@@ -1935,12 +2079,10 @@
       const categoryList = document.getElementById("category-list");
       const tagCloud = document.getElementById("tag-cloud");
       try {
-        const [catsRes, tagsRes] = await Promise.all([
-          fetch(`${API_BASE_URL}/api/categorias`),
-          fetch(`${API_BASE_URL}/api/tags`)
+        const [catsData, tagsData] = await Promise.all([
+          api_default.buscarCategorias(),
+          api_default.buscarTags()
         ]);
-        const catsData = await catsRes.json();
-        const tagsData = await tagsRes.json();
         if (categoryList && catsData.categorias) {
           categoryList.innerHTML = catsData.categorias.map((cat) => `<li><a href="/blog.html?categoria=${cat.slug}">${cat.nome}</a></li>`).join("");
         }
@@ -1983,21 +2125,10 @@
       const formData = new FormData(form);
       const data = Object.fromEntries(formData.entries());
       try {
-        const response = await fetch(`${API_BASE_URL}/api/contato`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(data)
-        });
-        const result = await response.json();
-        if (!response.ok) {
-          throw new Error(result.mensagem || "Ocorreu um erro.");
-        }
-        alertPlaceholder.append(createAlert(result.mensagem, "success"));
+        const result = await api_default.enviarContato(data);
+        alertPlaceholder.append(createAlert(result.mensagem || "Mensagem enviada com sucesso!", "success"));
         form.reset();
       } catch (error) {
-        console.error("Erro ao enviar formul\xE1rio:", error);
         alertPlaceholder.append(createAlert(error.message, "danger"));
       } finally {
         submitButton.disabled = false;
@@ -2028,8 +2159,7 @@
     const container = document.getElementById("destaques-blog-container");
     if (!container) return;
     try {
-      const response = await fetch(`${API_BASE_URL}/api/posts/destaques`);
-      const data = await response.json();
+      const data = await api_default.buscarPostsDestaque();
       if (data.posts && data.posts.length > 0) {
         const postsHtml = data.posts.map(createPostCard2).join("");
         container.innerHTML = postsHtml;
@@ -2037,14 +2167,12 @@
         container.innerHTML = '<p class="text-muted col-12 text-center">Nenhum artigo em destaque encontrado.</p>';
       }
     } catch (error) {
-      console.error("Erro ao buscar posts em destaque:", error);
       container.innerHTML = '<p class="text-danger col-12 text-center">N\xE3o foi poss\xEDvel carregar os artigos.</p>';
     }
   }
 
   // src/js/main.js
   document.addEventListener("DOMContentLoaded", () => {
-    console.log("DOM Carregado. Orquestrador JS iniciado.");
     setupGlobalFeatures();
     const bodyClassList = document.body.classList;
     if (bodyClassList.contains("page-home")) {

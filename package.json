@@ -1,6 +1,6 @@
 {
   "name": "plataforma-licitacoes",
-  "version": "1.0.0",
+  "version": "1.5.0",
   "description": "O Radar PNCP é uma aplicação web desenvolvida em Flask (Python) que atua como uma interface amigável e poderosa para o Portal Nacional de Contratações Públicas (PNCP). O objetivo principal é facilitar a busca, filtragem e acompanhamento de licitações públicas, oferecendo uma experiência de usuário superior à do portal oficial.",
   "main": "index.js",
   "scripts": {

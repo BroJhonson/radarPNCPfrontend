@@ -1,6 +1,6 @@
 // src/js/pages/post.js
 
-import { API_BASE_URL } from '../config.js';
+import api from '../services/api.js';
 import { decodeHtml } from '../modules/utils.js';
 
 export default async function initPostPage() {
@@ -20,14 +20,12 @@ export default async function initPostPage() {
     }
 
     try {
-        const response = await fetch(`${API_BASE_URL}/api/post/${postSlug}`);
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.erro || 'Erro ao buscar o post.');
-        }
-
+        const data = await api.buscarPost(postSlug);
         const post = data.post;
+        
+        if (!post) {
+            throw new Error('Post não encontrado.');
+        }
         
         // PREENCHER A PÁGINA (CÓDIGO MOVIDO PARA CÁ)
         document.title = `${decodeHtml(post.titulo)} - Blog RADAR PNCP`;
@@ -93,12 +91,10 @@ export default async function initPostPage() {
     const categoryList = document.getElementById('category-list');
     const tagCloud = document.getElementById('tag-cloud');
     try {
-        const [catsRes, tagsRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/api/categorias`),
-        fetch(`${API_BASE_URL}/api/tags`)
+        const [catsData, tagsData] = await Promise.all([
+        api.buscarCategorias(),
+        api.buscarTags()
         ]);
-        const catsData = await catsRes.json();
-        const tagsData = await tagsRes.json();
 
         if (categoryList && catsData.categorias) {
         categoryList.innerHTML = catsData.categorias

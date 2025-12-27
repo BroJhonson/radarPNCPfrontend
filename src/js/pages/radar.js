@@ -2,7 +2,7 @@
 
 // 1. Importar as funções que precisamos de outros módulos
 import { getFavoritos, adicionarFavorito, removerFavorito, isFavorito } from '../modules/favorites.js';
-import { API_BASE_URL } from '../config.js'; // Nosso "GPS"
+import api from '../services/api.js'; // Serviço centralizado de API
 
 // 2. Envolver toda a lógica da página em uma função principal
 export default function initRadarPage() {
@@ -100,32 +100,49 @@ export default function initRadarPage() {
     const btnExportarCsv = document.getElementById('btnExportarCsv');
     if (btnExportarCsv) {
         btnExportarCsv.addEventListener('click', function() {
-            const params = new URLSearchParams();
+            // Coleta os mesmos filtros usados na busca
+            const ufsSelecionadas = Array.from(document.querySelectorAll('.filter-uf:checked')).map(cb => cb.value);
+            const modalidadesSelecionadas = Array.from(document.querySelectorAll('.filter-modalidade:checked')).map(cb => parseInt(cb.value));
+            const municipiosSelecionados = Array.from(document.querySelectorAll('#municipiosContainerDropdown .filter-municipio:checked')).map(cb => cb.value);
+            const statusSelecionado = document.querySelector('.filter-status:checked');
+            const [orderByField, orderDirValue] = ordenarPorSelect.value.split('_');
+            
+            const filters = {
+                orderBy: orderByField,
+                orderDir: orderDirValue.toUpperCase(),
+            };
+            
             if (palavrasChaveInclusao.length > 0) {
-                palavrasChaveInclusao.forEach(p => params.append('palavraChave', p));
+                filters.palavraChave = palavrasChaveInclusao;
             }
             if (palavrasChaveExclusao.length > 0) {
-                palavrasChaveExclusao.forEach(p => params.append('excluirPalavra', p));
+                filters.excluirPalavra = palavrasChaveExclusao;
             }
-            document.querySelectorAll('.filter-uf:checked').forEach(cb => params.append('uf', cb.value));
-            document.querySelectorAll('.filter-modalidade:checked').forEach(cb => params.append('modalidadeId', cb.value));
-            const statusSelecionado = document.querySelector('.filter-status:checked');
-            if (statusSelecionado) {
-                params.append('statusRadar', statusSelecionado.value);
+            if (ufsSelecionadas.length > 0) {
+                filters.uf = ufsSelecionadas;
             }
-            document.querySelectorAll('#municipiosContainerDropdown .filter-municipio:checked').forEach(cb => params.append('municipioNome', cb.value));
-            if (dataPubInicioInput.value) params.append('dataPubInicio', dataPubInicioInput.value);
-            if (dataPubFimInput.value) params.append('dataPubFim', dataPubFimInput.value);
-            if (dataAtualizacaoInicioInput.value) params.append('dataAtualizacaoInicio', dataAtualizacaoInicioInput.value);
-            if (dataAtualizacaoFimInput.value) params.append('dataAtualizacaoFim', dataAtualizacaoFimInput.value);
-            if (valorMinInput.value) params.append('valorMin', valorMinInput.value);
-            if (valorMaxInput.value) params.append('valorMax', valorMaxInput.value);
-            const [orderByField, orderDirValue] = ordenarPorSelect.value.split('_');
-            params.append('orderBy', orderByField);
-            params.append('orderDir', orderDirValue.toUpperCase());
-            // console.log("Exportando com os seguintes parâmetros:", params.toString());
-            const url = `/api/exportar-csv?${params.toString()}`;
-            window.open(url, '_blank');
+            if (modalidadesSelecionadas.length > 0) {
+                filters.modalidadeId = modalidadesSelecionadas;
+            }
+            if (municipiosSelecionados.length > 0) {
+                filters.municipioNome = municipiosSelecionados;
+            }
+            if (statusSelecionado && statusSelecionado.value) {
+                filters.statusRadar = statusSelecionado.value;
+            }
+            if (dataPubInicioInput.value) filters.dataPubInicio = dataPubInicioInput.value;
+            if (dataPubFimInput.value) filters.dataPubFim = dataPubFimInput.value;
+            if (dataAtualizacaoInicioInput && dataAtualizacaoInicioInput.value) {
+                filters.dataAtualizacaoInicio = dataAtualizacaoInicioInput.value;
+            }
+            if (dataAtualizacaoFimInput && dataAtualizacaoFimInput.value) {
+                filters.dataAtualizacaoFim = dataAtualizacaoFimInput.value;
+            }
+            if (valorMinInput.value) filters.valorMin = parseFloat(valorMinInput.value);
+            if (valorMaxInput.value) filters.valorMax = parseFloat(valorMaxInput.value);
+            
+            // console.log("Exportando com os seguintes filtros:", filters);
+            api.exportarCSV(filters);
         });
     }
 
@@ -618,14 +635,11 @@ export default function initRadarPage() {
         for (const pncpId of favoritosIds) {
             let licData = cacheLicitacoesSidebar[pncpId];
             if (!licData) {
-                try {                    
-                    const response = await fetch(`${API_BASE_URL}/api/licitacao/${encodeURIComponent(pncpId)}`);
-                    if (response.ok) {
-                        const fullData = await response.json();
-                        if (fullData.licitacao) {
-                            licData = fullData.licitacao;
-                            cacheLicitacoesSidebar[pncpId] = licData;
-                        }
+                try {
+                    const fullData = await api.buscarDetalhesLicitacao(pncpId);
+                    if (fullData && fullData.licitacao) {
+                        licData = fullData.licitacao;
+                        cacheLicitacoesSidebar[pncpId] = licData;
                     }
                 } catch (error) {
                     // console.error("Erro ao buscar favorito para sidebar:", error);
@@ -662,10 +676,7 @@ export default function initRadarPage() {
         if (!modalidadesContainer) return;
         modalidadesContainer.innerHTML = '<small class="text-muted">Carregando modalidades...</small>';
         try {
-            // ### ALTERAÇÃO CRÍTICA AQUI ###
-            const response = await fetch(`${API_BASE_URL}/api/referencias/modalidades`);
-            if (!response.ok) throw new Error(`Erro na API: ${response.status}`);
-            const modalidadesApi = await response.json();
+            const modalidadesApi = await api.buscarModalidades();
             modalidadesContainer.innerHTML = '';
             if (modalidadesApi && modalidadesApi.length > 0) {
                 modalidadesApi.sort((a, b) => a.modalidadeNome.localeCompare(b.modalidadeNome));
@@ -693,10 +704,7 @@ export default function initRadarPage() {
         if (!statusContainer) return;
         statusContainer.innerHTML = '<small class="text-muted">Carregando status...</small>';
         try {
-            // ### ALTERAÇÃO CRÍTICA AQUI ###
-            const response = await fetch(`${API_BASE_URL}/api/referencias/statusradar`);
-            if (!response.ok) throw new Error(`Erro na API: ${response.status}`);
-            const statusRadarApi = await response.json();
+            const statusRadarApi = await api.buscarStatusRadar();
 
             statusContainer.innerHTML = '';
             if (statusRadarApi && statusRadarApi.length > 0) {
@@ -777,21 +785,18 @@ export default function initRadarPage() {
         let ufsComErro = [];
         for (const uf of ufsSelecionadas) {
             try {
-                const response = await fetch(`${API_BASE_URL}/api/ibge/municipios/${uf}`);
-                const data = await response.json();
+                const data = await api.buscarMunicipiosIBGE(uf);
                 // console.log(`Resposta da API para UF ${uf}:`, data);
-                if (!response.ok) {
-                    ufsComErro.push(uf);
-                    continue;
-                }
-                data.forEach(mun => {
-                    todosMunicipios.push({
-                        id: `${uf}-${mun.id}`,
-                        nome: `${mun.nome} (${uf})`,
-                        nomeOriginal: mun.nome,
-                        uf: uf
+                if (data && Array.isArray(data)) {
+                    data.forEach(mun => {
+                        todosMunicipios.push({
+                            id: `${uf}-${mun.id}`,
+                            nome: `${mun.nome} (${uf})`,
+                            nomeOriginal: mun.nome,
+                            uf: uf
+                        });
                     });
-                });
+                }
             } catch (error) {
                 // console.error(`Erro crítico ao carregar municípios para ${uf}:`, error);
                 ufsComErro.push(uf);
@@ -842,24 +847,17 @@ export default function initRadarPage() {
             btnAplicar.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Buscando...`;
         }
         currentPage = page;
-        const params = new URLSearchParams();
         if (loadingOverlay) loadingOverlay.classList.remove('d-none');
-        if (palavrasChaveInclusao.length > 0) {
-            palavrasChaveInclusao.forEach(p => params.append('palavraChave', p));
-        }
-        if (palavrasChaveExclusao.length > 0) {
-            palavrasChaveExclusao.forEach(p => params.append('excluirPalavra', p));
-        }
-        document.querySelectorAll('.filter-uf:checked').forEach(cb => params.append('uf', cb.value));
-        document.querySelectorAll('.filter-modalidade:checked').forEach(cb => params.append('modalidadeId', cb.value));
+        
+        // Coleta filtros
+        const ufsSelecionadas = Array.from(document.querySelectorAll('.filter-uf:checked')).map(cb => cb.value);
+        const modalidadesSelecionadas = Array.from(document.querySelectorAll('.filter-modalidade:checked')).map(cb => parseInt(cb.value));
+        const municipiosSelecionados = Array.from(document.querySelectorAll('#municipiosContainerDropdown .filter-municipio:checked')).map(cb => cb.value);
         const statusSelecionadoRadio = document.querySelector('.filter-status:checked');
-        let statusRadarValor = '';
-        if (statusSelecionadoRadio) {
-            statusRadarValor = statusSelecionadoRadio.value;
-        }
-        if (statusRadarValor) {
-            params.append('statusRadar', statusRadarValor);
-        }
+        const statusRadarValor = statusSelecionadoRadio ? statusSelecionadoRadio.value : '';
+        const [orderByField, orderDirValue] = ordenarPorSelect.value.split('_');
+        
+        // Validação: palavra-chave obrigatória para certos status
         if (statusWarning) statusWarning.classList.add('d-none');
         if ((statusRadarValor === "" || statusRadarValor === "Encerrada") && palavrasChaveInclusao.length === 0) {
             if (statusWarning) {
@@ -877,58 +875,67 @@ export default function initRadarPage() {
             }
             return;
         }
-        const municipiosSelecionados = Array.from(document.querySelectorAll('#municipiosContainerDropdown .filter-municipio:checked')).map(cb => cb.value);
+        
+        // Monta objeto de filtros para o serviço de API
+        const filters = {
+            pagina: currentPage,
+            porPagina: parseInt(itensPorPaginaSelect.value, 10),
+            orderBy: orderByField,
+            orderDir: orderDirValue.toUpperCase(),
+        };
+        
+        if (palavrasChaveInclusao.length > 0) {
+            filters.palavraChave = palavrasChaveInclusao;
+        }
+        if (palavrasChaveExclusao.length > 0) {
+            filters.excluirPalavra = palavrasChaveExclusao;
+        }
+        if (ufsSelecionadas.length > 0) {
+            filters.uf = ufsSelecionadas;
+        }
+        if (modalidadesSelecionadas.length > 0) {
+            filters.modalidadeId = modalidadesSelecionadas;
+        }
         if (municipiosSelecionados.length > 0) {
-            municipiosSelecionados.forEach(mun => params.append('municipioNome', mun));
+            filters.municipioNome = municipiosSelecionados;
         }
-        const dataInicio = dataPubInicioInput.value;
-        if (dataInicio) params.append('dataPubInicio', dataInicio);
-        const dataFim = dataPubFimInput.value;
-        if (dataFim) params.append('dataPubFim', dataFim);
-        if (dataAtualizacaoInicioInput && dataAtualizacaoFimInput) {
-            const dataAtualInicio = dataAtualizacaoInicioInput.value;
-            if (dataAtualInicio) params.append('dataAtualizacaoInicio', dataAtualInicio);
-            const dataAtualFim = dataAtualizacaoFimInput.value;
-            if (dataAtualFim) params.append('dataAtualizacaoFim', dataAtualFim);
+        if (statusRadarValor) {
+            filters.statusRadar = statusRadarValor;
         }
-        const valMin = valorMinInput.value;
-        if (valMin) params.append('valorMin', valMin);
-        const valMax = valorMaxInput.value;
-        if (valMax) params.append('valorMax', valMax);
-        params.append('pagina', currentPage);
-        params.append('porPagina', itensPorPaginaSelect.value);
-        const [orderByField, orderDirValue] = ordenarPorSelect.value.split('_');
-        params.append('orderBy', orderByField);
-        params.append('orderDir', orderDirValue.toUpperCase());
+        if (dataPubInicioInput.value) {
+            filters.dataPubInicio = dataPubInicioInput.value;
+        }
+        if (dataPubFimInput.value) {
+            filters.dataPubFim = dataPubFimInput.value;
+        }
+        if (dataAtualizacaoInicioInput && dataAtualizacaoInicioInput.value) {
+            filters.dataAtualizacaoInicio = dataAtualizacaoInicioInput.value;
+        }
+        if (dataAtualizacaoFimInput && dataAtualizacaoFimInput.value) {
+            filters.dataAtualizacaoFim = dataAtualizacaoFimInput.value;
+        }
+        if (valorMinInput.value) {
+            filters.valorMin = parseFloat(valorMinInput.value);
+        }
+        if (valorMaxInput.value) {
+            filters.valorMax = parseFloat(valorMaxInput.value);
+        }
+        
         licitacoesTableBody.innerHTML = `<tr><td colspan="8" class="text-center">Buscando licitações... <div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div></td></tr>`;
         totalRegistrosInfo.textContent = '-';
         exibicaoInfo.textContent = '';
+        
         try {
-            // console.log("[DEBUG] ⚙️ Parâmetros da API:", params.toString());
-            const apiUrl = `${API_BASE_URL}/api/licitacoes?${params.toString()}`;
-            // console.log("[DEBUG] Chamando API em:", apiUrl);
-            const response = await fetch(apiUrl);
-            
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                // console.error("Erro da API:", response.status, errorData);
-                let errorMessage = `Erro ${response.status}`;
-                if (response.status === 400 && errorData.erro) {
-                    errorMessage = `Erro de validação: ${errorData.erro}${errorData.detalhes ? ' ('+errorData.detalhes+')' : ''}`;
-                } else if (response.status === 404) {
-                    errorMessage = "Recurso não encontrado no servidor (404).";
-                } else if (errorData.erro_backend) {
-                    errorMessage = `Erro no servidor: ${errorData.erro_backend}`;
-                } else if (errorData.erro_frontend) {
-                    errorMessage = `Erro no servidor do frontend: ${errorData.erro_frontend}`;
-                } else if (response.statusText) {
-                    errorMessage = `Erro ${response.status}: ${response.statusText}`;
-                }
-                throw new Error(`Erro na API: ${response.status}`);
-            }
-            const data = await response.json();
+            // console.log("[DEBUG] ⚙️ Filtros da API:", filters);
+            const data = await api.buscarLicitacoes(filters);
             // console.log("[DEBUG] ✅ Dados recebidos da API:", data);
-            renderLicitacoesTable(data.licitacoes);
+            
+            // Valida estrutura de resposta
+            if (!data || typeof data !== 'object') {
+                throw new Error('Resposta inválida da API');
+            }
+            
+            renderLicitacoesTable(data.licitacoes || []);
             renderPagination(data);
             atualizarExibicaoFiltrosAtivos();
             totalRegistrosInfo.textContent = data.total_registros || '0';
@@ -944,7 +951,8 @@ export default function initRadarPage() {
             }
         } catch (error) {
             // console.error("[DEBUG] 💥 Erro crítico ao buscar licitações:", error);
-            licitacoesTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Erro ao buscar licitações: ${error.message}</td></tr>`;
+            const errorMessage = error.message || 'Erro desconhecido ao buscar licitações';
+            licitacoesTableBody.innerHTML = `<tr><td colspan="8" class="text-center text-danger">Erro ao buscar licitações: ${errorMessage}</td></tr>`;
             totalRegistrosInfo.textContent = '0';
             exibicaoInfo.textContent = 'Erro';
             paginationControls.innerHTML = '';
@@ -1219,19 +1227,13 @@ export default function initRadarPage() {
         document.getElementById('detailsPanelArquivosList').innerHTML = '';
         detailsPanel.show();
         try {
-            const response = await fetch(`${API_BASE_URL}/api/licitacao/${encodeURIComponent(pncpId)}`);
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({
-                    erro_frontend: "Erro desconhecido na resposta da API de detalhes."
-                }));
-                throw new Error(errorData.erro_backend || errorData.erro_frontend || `Erro ${response.status}`);
-            }
-            const data = await response.json();
+            const data = await api.buscarDetalhesLicitacao(pncpId);
             // console.log("[DEBUG] Dados de DETALHES recebidos para PNCP ID:", pncpId, JSON.parse(JSON.stringify(data)));
             renderDetailsPanelContent(data);
         } catch (error) {
             // console.error("Erro ao buscar detalhes da licitação:", error);
-            detailsPanelContent.innerHTML = `<p class="text-center text-danger">Erro ao carregar detalhes: ${error.message}</p>`;
+            const errorMessage = error.message || 'Erro desconhecido ao carregar detalhes';
+            detailsPanelContent.innerHTML = `<p class="text-center text-danger">Erro ao carregar detalhes: ${errorMessage}</p>`;
         }
     }
 

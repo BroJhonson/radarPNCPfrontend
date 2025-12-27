@@ -1,6 +1,6 @@
 // frontend/src/js/pages/blog.js
 
-import { API_BASE_URL } from '../config.js';
+import api from '../services/api.js';
 import { decodeHtml } from '../modules/utils.js'; 
 
 // Função para criar o HTML de um único card de post
@@ -58,8 +58,7 @@ async function loadSidebarData() {
 
     // Categorias
     try {
-        const response = await fetch(`${API_BASE_URL}/api/categorias`);
-        const data = await response.json();
+        const data = await api.buscarCategorias();
         if (data.categorias) {
             categoryList.innerHTML = data.categorias.map(cat => 
                 `<li><a href="/blog.html?categoria=${cat.slug}">${cat.nome}</a></li>`
@@ -72,8 +71,7 @@ async function loadSidebarData() {
 
     // Tags
     try {
-        const response = await fetch(`${API_BASE_URL}/api/tags`);
-        const data = await response.json();
+        const data = await api.buscarTags();
         if (data.tags) {
             tagCloud.innerHTML = data.tags.map(tag => 
                 `<a href="/blog.html?tag=${tag.nome}" class="tag-item">${tag.nome}</a>`
@@ -148,28 +146,20 @@ async function fetchAndDisplayPosts() {
     postsContainer.innerHTML = '';
 
     try {
-        const params = new URLSearchParams(window.location.search);
-        const categoriaSlug = params.get('categoria');
-        const tagNome = params.get('tag');
-        const searchTerm = params.get('q'); // <-- NOVO: Lê o parâmetro de busca
-        const page = params.get('page') || '1'; // Pega a página da URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoriaSlug = urlParams.get('categoria');
+        const tagNome = urlParams.get('tag');
+        const searchTerm = urlParams.get('q'); // <-- NOVO: Lê o parâmetro de busca
+        const page = urlParams.get('page') || '1'; // Pega a página da URL
 
-        let apiUrl = `${API_BASE_URL}/api/posts`;
-        const queryParams = [];
-        if (categoriaSlug) queryParams.push(`categoria=${categoriaSlug}`);
-        if (tagNome) queryParams.push(`tag=${encodeURIComponent(tagNome)}`);
-        if (searchTerm) queryParams.push(`q=${encodeURIComponent(searchTerm)}`); // <-- NOVO: Adiciona a busca à URL da API
-
-        if (queryParams.length > 0) {
-            apiUrl += `?${queryParams.join('&')}`;
-        }
-
-        queryParams.push(`page=${page}`); // Adiciona a página à chamada da API
+        const params = {
+            page: parseInt(page, 10) || 1
+        };
+        if (categoriaSlug) params.categoria = categoriaSlug;
+        if (tagNome) params.tag = tagNome;
+        if (searchTerm) params.q = searchTerm;
         
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error(`Erro na API: ${response.statusText}`);
-        
-        const data = await response.json();
+        const data = await api.buscarPosts(params);
 
         if (data.posts && data.posts.length > 0) {
             const postsHtml = data.posts.map(createPostCard).join('');
@@ -257,22 +247,17 @@ export default async function initBlogPage() {
 
     try {
         // --- Captura filtros da URL ---
-        const params = new URLSearchParams(window.location.search);
-        const categoriaSlug = params.get('categoria');
-        const tagNome = params.get('tag');
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoriaSlug = urlParams.get('categoria');
+        const tagNome = urlParams.get('tag');
 
-        // --- Monta URL da API ---
-        let apiUrl = `${API_BASE_URL}/api/posts`;
-        const queryParams = [];
-        if (categoriaSlug) queryParams.push(`categoria=${categoriaSlug}`);
-        if (tagNome) queryParams.push(`tag=${encodeURIComponent(tagNome)}`);
-        if (queryParams.length > 0) apiUrl += `?${queryParams.join('&')}`;
+        // --- Monta parâmetros da API ---
+        const params = {};
+        if (categoriaSlug) params.categoria = categoriaSlug;
+        if (tagNome) params.tag = tagNome;
 
         // --- Faz a requisição ---
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error(`Erro na API: ${response.statusText}`);
-        
-        const data = await response.json();
+        const data = await api.buscarPosts(params);
         if (data.posts && data.posts.length > 0) {
             const postsHtml = data.posts.map(createPostCard).join('');
             postsContainer.innerHTML = postsHtml;
